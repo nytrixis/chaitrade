@@ -1,0 +1,11 @@
+{
+  "network": "fuji",
+  "chainId": 43113,
+  "deployer": "0xfF01A2491F19A0342f6B6b490D9ffDE0320306A1",
+  "usdc": "0x44Dfe881db6aD56c9Aff744Dcc572BB22Cb86F2e",
+  "verifier": "0xe33618010d4DAa40EDD536BCcA090cE4B36b25EF",
+  "creditOracle": "0x22eaaa5E8C2E754A19506d869860cC6dB3dE9cF7",
+  "invoiceNFT": "0xDA7D75c4A0716b1dfaD6EA597903429fBC59c7a4",
+  "fundingPool": "0x08BC49F4fA55D83cEB2406852ce295c7bf039A49",
+  "timestamp": "2026-01-03T10:53:51.018Z"
+}

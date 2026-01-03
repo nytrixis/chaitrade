@@ -1,0 +1,39 @@
+{
+  "name": "chaitrade",
+  "version": "1.0.0",
+  "description": "Privacy-Preserving Community MSME Invoice Financing on Avalanche",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint",
+    "type-check": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@rainbow-me/rainbowkit": "^2.1.0",
+    "@supabase/supabase-js": "^2.38.0",
+    "@tanstack/react-query": "^5.25.0",
+    "axios": "^1.6.0",
+    "clsx": "^2.0.0",
+    "ethers": "^6.9.0",
+    "ffjavascript": "^0.3.1",
+    "next": "^14.1.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "snarkjs": "^0.7.5",
+    "tailwindcss": "^3.4.0",
+    "tesseract.js": "^7.0.0",
+    "viem": "^2.8.0",
+    "wagmi": "^2.4.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.0",
+    "@types/react": "^18.2.42",
+    "@types/react-dom": "^18.2.17",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.31",
+    "tailwindcss": "^3.4.0",
+    "typescript": "^5.3.3"
+  }
+}
