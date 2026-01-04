@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
-import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
-import { parseUnits, encodePacked, keccak256, toHex } from "viem";
+import { useState, useEffect } from "react";
+import { useAccount, useWriteContract, useWaitForTransactionReceipt, usePublicClient } from "wagmi";
+import { parseUnits, encodePacked, keccak256, toHex, decodeEventLog } from "viem";
 import { uploadToPinata } from "@/lib/pinata/upload";
 import { extractInvoiceData, validateInvoiceData } from "@/lib/ai/ocr";
 import { generateCreditScoreProof, calculateCreditScore } from "@/lib/zk/generateProof";
@@ -23,6 +23,7 @@ export function InvoiceUpload({ onSuccess }: InvoiceUploadProps) {
   const { address, isConnected } = useAccount();
   const { writeContract, data: hash, isPending } = useWriteContract();
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
+  const publicClient = usePublicClient();
 
   const [step, setStep] = useState<"upload" | "extract" | "zkproof" | "mint" | "success">(
     "upload"
@@ -30,6 +31,7 @@ export function InvoiceUpload({ onSuccess }: InvoiceUploadProps) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [invoiceData, setInvoiceData] = useState<any>(null);
+  const [mintHash, setMintHash] = useState<string | null>(null);
   const [creditScore, setCreditScore] = useState<number | null>(null);
   const [ipfsCID, setIPFSCID] = useState<string | null>(null);
   const [zkProof, setZkProof] = useState<any>(null);
@@ -48,6 +50,13 @@ export function InvoiceUpload({ onSuccess }: InvoiceUploadProps) {
   const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+
+    // Check file type - Support both images and PDFs
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+    if (!validTypes.includes(file.type)) {
+      setError('⚠️ Please upload a valid invoice file (JPG, PNG, or PDF)');
+      return;
+    }
 
     setLoading(true);
     setError(null);
@@ -86,7 +95,6 @@ export function InvoiceUpload({ onSuccess }: InvoiceUploadProps) {
 
       // Step 4: Commit credit score to oracle
       const commitmentBytes32 = toHex(BigInt(proof.commitment), { size: 32 });
-
       writeContract({
         address: CONTRACT_ADDRESSES.ZKCreditOracle as `0x${string}`,
         abi: ZKCREDITOACLE_ABI,
@@ -135,55 +143,115 @@ export function InvoiceUpload({ onSuccess }: InvoiceUploadProps) {
     }
   };
 
-  // Watch for transaction confirmation
-  if (isConfirmed && step === "mint" && !nftTokenId) {
-    // Transaction confirmed - save to database
-    (async () => {
-      try {
-        // In production, parse the token ID from transaction receipt events
-        const tokenId = Date.now(); // Placeholder - should extract from event logs
-        setNftTokenId(tokenId);
+  // Watch for transaction confirmation - use the hash from useWriteContract
+  useEffect(() => {
+    console.log('Transaction state updated:', {
+      step,
+      hash,
+      isConfirmed,
+      nftTokenId,
+      isPending,
+    });
 
-        if (isSupabaseConfigured && invoiceData && ipfsCID) {
-          await createInvoice({
-            msme_address: address!.toLowerCase(),
-            invoice_nft_id: tokenId,
-            amount: invoiceData.amount,
-            buyer_name: invoiceData.buyerName,
-            due_date: invoiceData.dueDate,
-            ipfs_cid: ipfsCID,
-            credit_score: creditScore || 0,
-            status: 'pending',
-          });
-          console.log('✓ Saved to database');
+    if (isConfirmed && step === "mint" && !nftTokenId && hash && publicClient) {
+      console.log('Mint transaction confirmed:', hash);
+      // Transaction confirmed - extract token ID from event logs
+      (async () => {
+        try {
+          // Get transaction receipt
+          const receipt = await publicClient.getTransactionReceipt({ hash });
+          console.log('Transaction receipt:', receipt);
+
+          // Find InvoiceMinted event in logs
+          let extractedTokenId: number | null = null;
+
+          for (const log of receipt.logs) {
+            try {
+              const decoded = decodeEventLog({
+                abi: INVOICENFT_ABI,
+                data: log.data,
+                topics: log.topics,
+              });
+
+              if (decoded.eventName === 'InvoiceMinted') {
+                extractedTokenId = Number((decoded.args as any).tokenId);
+                console.log('✓ Extracted token ID from InvoiceMinted event:', extractedTokenId);
+                break;
+              }
+            } catch (err) {
+              // Skip logs that don't match our ABI
+              continue;
+            }
+          }
+
+          // Fallback to timestamp if event parsing fails
+          const tokenId = extractedTokenId !== null ? extractedTokenId : Date.now();
+          if (extractedTokenId === null) {
+            console.warn('Could not extract token ID from events, using fallback:', tokenId);
+          }
+
+          setNftTokenId(tokenId);
+          console.log('Setting token ID:', tokenId);
+
+          if (isSupabaseConfigured && invoiceData && ipfsCID) {
+            console.log('Saving invoice to database:', {
+              msme_address: address!.toLowerCase(),
+              invoice_nft_id: tokenId,
+              amount: invoiceData.amount,
+              buyer_name: invoiceData.buyerName,
+              due_date: invoiceData.dueDate,
+              ipfs_cid: ipfsCID,
+              credit_score: creditScore || 0,
+              status: 'pending',
+            });
+            await createInvoice({
+              msme_address: address!.toLowerCase(),
+              invoice_nft_id: tokenId,
+              amount: invoiceData.amount,
+              buyer_name: invoiceData.buyerName,
+              due_date: invoiceData.dueDate,
+              ipfs_cid: ipfsCID,
+              credit_score: creditScore || 0,
+              status: 'pending',
+            });
+            console.log('✓ Saved to database');
+          } else {
+            console.warn('Supabase not configured or missing data:', {
+              isSupabaseConfigured,
+              hasInvoiceData: !!invoiceData,
+              hasIPFSCID: !!ipfsCID,
+            });
+          }
+
+          setStep("success");
+          setLoading(false);
+
+          if (onSuccess) {
+            onSuccess({
+              ...invoiceData,
+              ipfsCID,
+              creditScore,
+              nftTokenId: tokenId,
+              address,
+            });
+          }
+        } catch (err) {
+          console.error('Database error:', err);
+          setError(`Invoice minted (tx: ${hash}) but failed to save to database: ${err instanceof Error ? err.message : 'Unknown error'}`);
+          setLoading(false);
+          // Still show success to user since on-chain mint succeeded
+          setStep("success");
         }
-
-        setStep("success");
-        setLoading(false);
-
-        if (onSuccess) {
-          onSuccess({
-            ...invoiceData,
-            ipfsCID,
-            creditScore,
-            nftTokenId: tokenId,
-            address,
-          });
-        }
-      } catch (err) {
-        console.error('Database error:', err);
-        setError('Invoice minted but failed to save to database');
-        setLoading(false);
-      }
-    })();
-  }
+      })();
+    }
+  }, [isConfirmed, step, nftTokenId, hash, invoiceData, ipfsCID, address, creditScore, onSuccess, publicClient]);
 
   return (
     <div className="card space-y-6">
       <div>
         <h3 className="text-2xl font-bold mb-2 text-off-white">Upload Invoice</h3>
         <p className="text-base text-light-gray">
-          Upload an invoice PDF or image. We'll extract the details and verify
+          Upload an invoice image. We'll extract the details and verify
           your creditworthiness using zero-knowledge proofs.
         </p>
       </div>
@@ -256,7 +324,7 @@ export function InvoiceUpload({ onSuccess }: InvoiceUploadProps) {
             <input
               type="file"
               onChange={handleFileUpload}
-              accept=".pdf,.jpg,.jpeg,.png"
+              accept=".jpg,.jpeg,.png,.pdf"
               disabled={loading}
               className="hidden"
             />
@@ -265,7 +333,7 @@ export function InvoiceUpload({ onSuccess }: InvoiceUploadProps) {
               Drop your invoice here
             </p>
             <p className="text-base text-light-gray">
-              or click to browse (PDF, JPG, PNG)
+              or click to browse (JPG, PNG, or PDF)
             </p>
           </label>
         </div>

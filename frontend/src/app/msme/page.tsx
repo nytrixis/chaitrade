@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import { useAccount } from "wagmi";
 import { InvoiceUpload } from "@/components/invoice/InvoiceUpload";
+import { InvoiceFormManual } from "@/components/invoice/InvoiceFormManual";
 import { FundingProgress } from "@/components/funding/FundingProgress";
 import { ConnectButton } from "@/components/ConnectButton";
 
@@ -24,7 +25,7 @@ export default function MSMEDashboard() {
   const { address, isConnected } = useAccount();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<"upload" | "invoices">("upload");
+  const [activeTab, setActiveTab] = useState<"upload" | "manual" | "invoices">("upload");
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -97,7 +98,7 @@ export default function MSMEDashboard() {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-4 mb-10 border-b border-medium-gray/20 pb-1">
+        <div className="flex gap-2 mb-10 border-b border-medium-gray/20 pb-1 flex-wrap">
           <button
             onClick={() => setActiveTab("upload")}
             className={`px-6 py-3 rounded-t-lg font-semibold transition-all ${
@@ -106,7 +107,17 @@ export default function MSMEDashboard() {
                 : "bg-dark-gray text-light-gray hover:text-off-white hover:bg-dark-gray/70"
             }`}
           >
-            📤 Upload Invoice
+            📤 Upload Image
+          </button>
+          <button
+            onClick={() => setActiveTab("manual")}
+            className={`px-6 py-3 rounded-t-lg font-semibold transition-all ${
+              activeTab === "manual"
+                ? "bg-sage-green-500 text-charcoal shadow-lg"
+                : "bg-dark-gray text-light-gray hover:text-off-white hover:bg-dark-gray/70"
+            }`}
+          >
+            ✏️ Enter Manually
           </button>
           <button
             onClick={() => setActiveTab("invoices")}
@@ -132,6 +143,17 @@ export default function MSMEDashboard() {
           </div>
         )}
 
+        {activeTab === "manual" && (
+          <div className="max-w-2xl">
+            <InvoiceFormManual
+              onSuccess={(data) => {
+                console.log("Invoice created:", data);
+                setActiveTab("invoices");
+              }}
+            />
+          </div>
+        )}
+
         {activeTab === "invoices" && (
           <div>
             {loading ? (
@@ -142,7 +164,7 @@ export default function MSMEDashboard() {
             ) : invoices.length === 0 ? (
               <div className="bg-dark-gray border border-medium-gray/20 rounded-xl p-6">
                 <p className="text-light-gray text-center mb-4">
-                  No invoices yet. Upload your first invoice above!
+                  No invoices yet. Upload an invoice or enter details manually above!
                 </p>
               </div>
             ) : (

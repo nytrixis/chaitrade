@@ -27,6 +27,17 @@ export const INVOICENFT_ABI = [
     type: 'function',
   },
   {
+    anonymous: false,
+    inputs: [
+      { indexed: true, name: 'tokenId', type: 'uint256' },
+      { indexed: true, name: 'msme', type: 'address' },
+      { indexed: false, name: 'amount', type: 'uint256' },
+      { indexed: false, name: 'dueDate', type: 'uint256' },
+    ],
+    name: 'InvoiceMinted',
+    type: 'event',
+  },
+  {
     inputs: [{ name: 'tokenId', type: 'uint256' }],
     name: 'getInvoice',
     outputs: [
