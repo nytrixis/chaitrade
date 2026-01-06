@@ -8,6 +8,7 @@ import { ConnectButton } from "@/components/ConnectButton";
 import { getInvoicesByMSME, Invoice } from "@/lib/supabase/invoices";
 import { getInvestmentsByInvestor, Investment } from "@/lib/supabase/investments";
 import { formatCurrency, formatDate } from "@/lib/utils/format";
+import { formatAVAX, avaxToInr } from "@/lib/utils/currency";
 import { PieChart, Pie, Cell, ResponsiveContainer, BarChart, Bar, XAxis, YAxis, Tooltip } from 'recharts';
 import { useInvoiceFunding } from "@/hooks/useInvoiceFunding";
 
@@ -256,9 +257,21 @@ export default function PortfolioPage() {
               {/* Stats Grid */}
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
                 <StatsCard label="Total Investments" value={investorStats.totalInvestments} color="sage-green" delay={0} />
-                <StatsCard label="Total Invested" value={formatCurrency(investorStats.totalInvested)} color="sage-green" delay={0.1} />
+                <StatsCard
+                  label="Total Invested"
+                  value={formatAVAX(investorStats.totalInvested)}
+                  subtitle={formatCurrency(avaxToInr(investorStats.totalInvested))}
+                  color="sage-green"
+                  delay={0.1}
+                />
                 <StatsCard label="Active" value={investorStats.activeInvestments} color="blue" delay={0.2} />
-                <StatsCard label="Expected Returns" value={formatCurrency(investorStats.expectedReturns)} color="purple" delay={0.3} />
+                <StatsCard
+                  label="Expected Returns"
+                  value={formatAVAX(investorStats.expectedReturns)}
+                  subtitle={formatCurrency(avaxToInr(investorStats.expectedReturns))}
+                  color="purple"
+                  delay={0.3}
+                />
               </div>
 
               {/* Investment Chart */}
@@ -271,7 +284,7 @@ export default function PortfolioPage() {
                       <YAxis stroke="#94a3b8" style={{ fontSize: '12px' }} />
                       <Tooltip
                         contentStyle={{ backgroundColor: '#1a1a1a', border: '1px solid #3d8b68', borderRadius: '8px' }}
-                        formatter={(value) => value ? `₹${Number(value).toLocaleString('en-IN')}` : '₹0'}
+                        formatter={(value) => value ? formatAVAX(Number(value)) : '0 AVAX'}
                       />
                       <Bar dataKey="amount" fill="#3d8b68" radius={[8, 8, 0, 0]} />
                     </BarChart>
@@ -307,7 +320,7 @@ export default function PortfolioPage() {
   );
 }
 
-function StatsCard({ label, value, color, delay }: { label: string; value: string | number; color: string; delay: number }) {
+function StatsCard({ label, value, color, delay, subtitle }: { label: string; value: string | number; color: string; delay: number; subtitle?: string }) {
   const colorClasses: Record<string, string> = {
     'sage-green': 'text-sage-green-500 from-sage-green-500/10 to-sage-green-500/5',
     'yellow': 'text-yellow-400 from-yellow-500/10 to-yellow-500/5',
@@ -324,6 +337,7 @@ function StatsCard({ label, value, color, delay }: { label: string; value: strin
       className={`card text-center bg-gradient-to-br ${colorClasses[color]}`}
     >
       <p className={`text-3xl font-bold ${colorClasses[color].split(' ')[0]}`}>{value}</p>
+      {subtitle && <p className="text-xs text-light-gray mt-1">{subtitle}</p>}
       <p className="text-sm text-light-gray mt-1">{label}</p>
     </motion.div>
   );
@@ -404,9 +418,11 @@ function InvestmentListItem({ investment, delay }: { investment: Investment; del
         <p className="text-xs text-light-gray mt-1">Interest Rate: {interestRate}% APR</p>
       </div>
       <div className="text-right">
-        <p className="text-2xl font-bold text-sage-green-500">{formatCurrency(investment.amount)}</p>
-        <p className="text-xs text-light-gray">Investment Amount</p>
-        <p className="text-sm text-purple-400 mt-1">Expected: {formatCurrency(totalReturn)}</p>
+        <p className="text-2xl font-bold text-sage-green-500">{formatAVAX(investment.amount)}</p>
+        <p className="text-xs text-light-gray">≈ {formatCurrency(avaxToInr(investment.amount))}</p>
+        <p className="text-xs text-light-gray mt-1">Investment Amount</p>
+        <p className="text-sm text-purple-400 mt-1">Expected: {formatAVAX(totalReturn)}</p>
+        <p className="text-xs text-purple-300">≈ {formatCurrency(avaxToInr(totalReturn))}</p>
       </div>
     </motion.div>
   );
