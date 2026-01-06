@@ -316,14 +316,14 @@ export default function InvoicePage() {
             <div className="card">
               <h3 className="text-xl font-bold text-off-white mb-4">Investors</h3>
 
-              {fundedAmount > 0 ? (
+              {fundedAmountInr > 0 ? (
                 <div className="space-y-3">
                   <div className="bg-dark-gray/50 rounded-lg p-4">
                     <div className="flex items-center justify-between">
                       <div>
                         <div className="text-light-gray text-sm mb-1">Total Investment</div>
                         <div className="text-off-white text-xl font-bold">
-                          {formatCurrency(fundedAmount, 0)}
+                          {formatCurrency(fundedAmountInr, 0)}
                         </div>
                       </div>
                       <div className="text-right">
@@ -481,7 +481,7 @@ export default function InvoicePage() {
         <FundingModal
           invoiceId={Number(id)}
           invoiceAmount={invoiceAmount}
-          currentlyFunded={fundedAmount}
+          currentlyFunded={fundedAmountAvax}
           interestRate={invoice.estimated_apr || 18}
           onClose={() => setShowFundingModal(false)}
           onSuccess={() => {
