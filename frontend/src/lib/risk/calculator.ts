@@ -13,7 +13,7 @@ export interface RiskFactors {
 }
 
 export interface RiskResult {
-  score: number; // 1-10 (10 = safest)
+  score: number; // 1-10 (1 = safest, 10 = riskiest)
   category: 'low' | 'medium' | 'high' | 'very_high';
   apr: number; // Interest rate %
   defaultProbability: number; // 0-10%
@@ -28,9 +28,11 @@ export interface RiskResult {
 
 /**
  * Calculate comprehensive risk score for an invoice
+ * Score: 1 = lowest risk (safest), 10 = highest risk (riskiest)
  */
 export function calculateRiskScore(factors: RiskFactors): RiskResult {
-  let score = 10; // Start at maximum (safest)
+  // Start at 1 (safest) and add risk points
+  let riskPoints = 0;
 
   // Track individual risk components
   const riskComponents = {
@@ -116,35 +118,37 @@ export function calculateRiskScore(factors: RiskFactors): RiskResult {
     riskComponents.termRisk * 0.15 +
     riskComponents.amountRisk * 0.1;
 
-  score = Math.max(1, Math.min(10, 10 - totalRisk));
+  // Score: 1 = lowest risk (safest), 10 = highest risk (riskiest)
+  // totalRisk ranges from ~0 to ~10, so we clamp it
+  const score = Math.max(1, Math.min(10, 1 + totalRisk));
 
   // ==========================================
-  // Determine Risk Category
+  // Determine Risk Category (inverted - lower score = lower risk)
   // ==========================================
   let category: 'low' | 'medium' | 'high' | 'very_high';
-  if (score >= 8) {
+  if (score <= 3) {
     category = 'low';
-  } else if (score >= 6) {
+  } else if (score <= 5) {
     category = 'medium';
-  } else if (score >= 4) {
+  } else if (score <= 7) {
     category = 'high';
   } else {
     category = 'very_high';
   }
 
   // ==========================================
-  // Calculate APR (inverse relationship with score)
+  // Calculate APR (direct relationship with score)
   // ==========================================
-  // Score 10 = 18% APR
-  // Score 1 = 36% APR
-  const apr = Math.round(36 - (score * 1.8));
+  // Score 1 = 18% APR (low risk, low return)
+  // Score 10 = 36% APR (high risk, high return)
+  const apr = Math.round(18 + ((score - 1) * 2));
 
   // ==========================================
   // Calculate Default Probability
   // ==========================================
-  // Score 10 = 0.5% default risk
-  // Score 1 = 10% default risk
-  const defaultProbability = Number(((10 - score) * 1.05).toFixed(2));
+  // Score 1 = 0.5% default risk
+  // Score 10 = 10% default risk
+  const defaultProbability = Number(((score - 1) * 1.05 + 0.5).toFixed(2));
 
   // ==========================================
   // Generate Recommendation

@@ -4,7 +4,9 @@ import { useState, useEffect } from 'react';
 import { useAccount } from 'wagmi';
 import { parseUnits } from 'viem';
 import { useInvest } from '@/hooks/useFundingPool';
+import { useInvoiceFunding } from '@/hooks/useInvoiceFunding';
 import { formatCurrency } from '@/lib/utils/format';
+import { formatAVAX, formatINR, inrToAvax, calculateReturns } from '@/lib/utils/currency';
 import { isValidInvestmentAmount } from '@/lib/utils/validation';
 
 export interface FundingModalProps {
@@ -27,11 +29,21 @@ export function FundingModal({
   const { address, isConnected } = useAccount();
   const { invest, isPending, isConfirming, isConfirmed, isError, error } = useInvest();
 
+  // Fetch real-time funding data from blockchain
+  const {
+    totalFundedInr,
+    remainingInr,
+    percentage: fundingProgress,
+    refetch
+  } = useInvoiceFunding(invoiceId);
+
   const [amount, setAmount] = useState('');
   const [validationError, setValidationError] = useState<string | null>(null);
 
-  const remainingAmount = invoiceAmount - currentlyFunded;
-  const fundingProgress = (currentlyFunded / invoiceAmount) * 100;
+  // Use blockchain data if available, otherwise fallback to props
+  const actualCurrentlyFunded = totalFundedInr || currentlyFunded;
+  const actualRemainingAmount = remainingInr || (invoiceAmount - currentlyFunded);
+  const actualProgress = fundingProgress || ((currentlyFunded / invoiceAmount) * 100);
 
   // Validate amount on change
   useEffect(() => {
@@ -41,18 +53,43 @@ export function FundingModal({
     }
 
     const numAmount = parseFloat(amount);
-    const validation = isValidInvestmentAmount(numAmount, invoiceAmount, currentlyFunded);
+    const validation = isValidInvestmentAmount(numAmount, invoiceAmount, actualCurrentlyFunded);
 
     if (!validation.valid) {
       setValidationError(validation.error || 'Invalid amount');
     } else {
       setValidationError(null);
     }
-  }, [amount, invoiceAmount, currentlyFunded]);
+  }, [amount, invoiceAmount, actualCurrentlyFunded]);
 
   // Handle successful investment
   useEffect(() => {
     if (isConfirmed) {
+      // Refetch blockchain data to update UI
+      refetch();
+
+      // Save to database
+      (async () => {
+        try {
+          const { recordInvestment } = await import("@/lib/supabase/investments");
+          const { getInvoiceByTokenId } = await import("@/lib/supabase/invoices");
+
+          const invoice = await getInvoiceByTokenId(invoiceId);
+
+          if (invoice && invoice.id && address) {
+            await recordInvestment(
+              invoice.id,
+              address,
+              parseFloat(amount),
+              interestRate
+            );
+            console.log("✓ Investment saved to database");
+          }
+        } catch (error) {
+          console.error("Failed to save investment to database:", error);
+        }
+      })();
+
       if (onSuccess) {
         onSuccess();
       }
@@ -60,7 +97,7 @@ export function FundingModal({
         onClose();
       }, 2000);
     }
-  }, [isConfirmed, onSuccess, onClose]);
+  }, [isConfirmed, onSuccess, onClose, refetch, invoiceId, address, amount, interestRate]);
 
   const handleInvest = () => {
     if (!amount || validationError) return;
@@ -70,13 +107,14 @@ export function FundingModal({
   };
 
   const setPercentage = (percentage: number) => {
-    const calculatedAmount = (remainingAmount * percentage) / 100;
+    const calculatedAmount = (actualRemainingAmount * percentage) / 100;
     setAmount(calculatedAmount.toFixed(0));
   };
 
-  // Calculate potential returns
-  const potentialReturns = amount ? parseFloat(amount) * (interestRate / 100) : 0;
-  const totalReturn = amount ? parseFloat(amount) + potentialReturns : 0;
+  // Calculate potential returns using currency utilities
+  const amountInr = parseFloat(amount || "0");
+  const amountAvax = inrToAvax(amountInr);
+  const returns = calculateReturns(amountAvax, interestRate, 60);
 
   return (
     <div
@@ -109,6 +147,9 @@ export function FundingModal({
                   <div className="text-off-white font-semibold">
                     {formatCurrency(invoiceAmount, 0)}
                   </div>
+                  <div className="text-xs text-light-gray">
+                    ({formatAVAX(inrToAvax(invoiceAmount))})
+                  </div>
                 </div>
                 <div>
                   <div className="text-light-gray mb-1">Interest Rate</div>
@@ -117,13 +158,16 @@ export function FundingModal({
                 <div>
                   <div className="text-light-gray mb-1">Already Funded</div>
                   <div className="text-off-white font-semibold">
-                    {formatCurrency(currentlyFunded, 0)}
+                    {formatCurrency(actualCurrentlyFunded, 0)}
                   </div>
                 </div>
                 <div>
                   <div className="text-light-gray mb-1">Remaining</div>
                   <div className="text-sage-green-400 font-semibold">
-                    {formatCurrency(remainingAmount, 0)}
+                    {formatCurrency(actualRemainingAmount, 0)}
+                  </div>
+                  <div className="text-xs text-light-gray">
+                    ({formatAVAX(inrToAvax(actualRemainingAmount))})
                   </div>
                 </div>
               </div>
@@ -132,12 +176,12 @@ export function FundingModal({
               <div className="mt-4">
                 <div className="flex justify-between text-xs mb-1">
                   <span className="text-light-gray">Progress</span>
-                  <span className="text-off-white">{fundingProgress.toFixed(1)}%</span>
+                  <span className="text-off-white">{actualProgress.toFixed(1)}%</span>
                 </div>
                 <div className="w-full bg-charcoal rounded-full h-2">
                   <div
                     className="bg-sage-green-500 h-2 rounded-full transition-all duration-500"
-                    style={{ width: `${fundingProgress}%` }}
+                    style={{ width: `${actualProgress}%` }}
                   ></div>
                 </div>
               </div>
@@ -197,26 +241,41 @@ export function FundingModal({
             {amount && !validationError && (
               <div className="bg-sage-green-500/10 border border-sage-green-500/20 rounded-lg p-4 mb-6">
                 <h3 className="text-sm font-semibold text-sage-green-400 mb-3">
-                  Estimated Returns
+                  Estimated Returns (60 days)
                 </h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-light-gray">Investment</span>
-                    <span className="text-off-white font-semibold">
-                      {formatCurrency(parseFloat(amount), 0)}
-                    </span>
+                    <div className="text-right">
+                      <div className="text-off-white font-semibold">
+                        {formatCurrency(amountInr, 0)}
+                      </div>
+                      <div className="text-xs text-light-gray">
+                        ({formatAVAX(amountAvax)})
+                      </div>
+                    </div>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-light-gray">Interest ({interestRate}%)</span>
-                    <span className="text-sage-green-400 font-semibold">
-                      {formatCurrency(potentialReturns, 0)}
-                    </span>
+                    <span className="text-light-gray">Interest ({interestRate}% APR)</span>
+                    <div className="text-right">
+                      <div className="text-sage-green-400 font-semibold">
+                        {formatINR(returns.interestINR)}
+                      </div>
+                      <div className="text-xs text-light-gray">
+                        ({formatAVAX(returns.interest)})
+                      </div>
+                    </div>
                   </div>
                   <div className="flex justify-between pt-2 border-t border-sage-green-500/20">
                     <span className="text-off-white font-semibold">Total Return</span>
-                    <span className="text-sage-green-400 font-bold text-lg">
-                      {formatCurrency(totalReturn, 0)}
-                    </span>
+                    <div className="text-right">
+                      <div className="text-sage-green-400 font-bold text-lg">
+                        {formatINR(returns.totalINR)}
+                      </div>
+                      <div className="text-xs text-light-gray">
+                        ({formatAVAX(returns.total)})
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -274,21 +333,31 @@ export function FundingModal({
               Investment Successful!
             </h3>
             <p className="text-light-gray mb-4">
-              You have successfully invested {formatCurrency(parseFloat(amount), 0)} in this invoice.
+              You have successfully invested {formatCurrency(amountInr, 0)} ({formatAVAX(amountAvax)}) in this invoice.
             </p>
             <div className="bg-sage-green-500/10 border border-sage-green-500/20 rounded-lg p-4 mb-6">
               <div className="text-sm space-y-2">
                 <div className="flex justify-between">
-                  <span className="text-light-gray">Expected Returns</span>
-                  <span className="text-sage-green-400 font-semibold">
-                    {formatCurrency(potentialReturns, 0)}
-                  </span>
+                  <span className="text-light-gray">Expected Interest</span>
+                  <div className="text-right">
+                    <div className="text-sage-green-400 font-semibold">
+                      {formatINR(returns.interestINR)}
+                    </div>
+                    <div className="text-xs text-light-gray">
+                      ({formatAVAX(returns.interest)})
+                    </div>
+                  </div>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between pt-2 border-t border-sage-green-500/20">
                   <span className="text-light-gray">Total Payout</span>
-                  <span className="text-sage-green-400 font-bold">
-                    {formatCurrency(totalReturn, 0)}
-                  </span>
+                  <div className="text-right">
+                    <div className="text-sage-green-400 font-bold">
+                      {formatINR(returns.totalINR)}
+                    </div>
+                    <div className="text-xs text-light-gray">
+                      ({formatAVAX(returns.total)})
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

@@ -2,12 +2,14 @@
 
 import Link from 'next/link';
 import { Invoice } from '@/lib/supabase/invoices';
-import { formatCurrency, formatDate, formatDaysUntilDue, formatAddress } from '@/lib/utils/format';
-import { INVOICE_STATUS_COLORS } from '@/lib/utils/constants';
+import { formatDate, formatAddress } from '@/lib/utils/format';
+import { CurrencyDisplay } from '@/components/CurrencyDisplay';
+import { useInvoiceFunding } from '@/hooks/useInvoiceFunding';
+import { useInvoiceStatus, getStatusLabel, getStatusColor } from '@/hooks/useInvoiceStatus';
 
 export interface InvoiceCardProps {
   invoice: Invoice;
-  fundingProgress?: number;
+  fundingProgress?: number; // Fallback if blockchain data unavailable
   showOwner?: boolean;
   className?: string;
 }
@@ -18,13 +20,33 @@ export function InvoiceCard({
   showOwner = false,
   className = ''
 }: InvoiceCardProps) {
+  // Fetch real-time funding data from blockchain
+  const {
+    percentage: blockchainProgress,
+    targetAmountInr,
+    totalFundedInr,
+    isLoading: loadingFunding
+  } = useInvoiceFunding(invoice.invoice_nft_id);
+
+  // Fetch real-time status from blockchain (source of truth)
+  const { status: blockchainStatus, isLoading: loadingStatus } = useInvoiceStatus(invoice.invoice_nft_id);
+
+  // Use blockchain data if available, otherwise fallback to prop/database
+  const actualProgress = loadingFunding ? fundingProgress : blockchainProgress;
+  const actualStatus = loadingStatus ? invoice.status : blockchainStatus;
+
+  // Use blockchain target amount if available, otherwise use 80% of invoice amount
+  const displayTargetAmount = targetAmountInr > 0 ? targetAmountInr : Math.round(invoice.amount * 0.8);
+  const displayRaisedAmount = totalFundedInr > 0 ? totalFundedInr : 0;
+
   const dueDate = new Date(invoice.due_date);
   const daysUntilDue = Math.ceil((dueDate.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
   const isOverdue = daysUntilDue < 0;
   const isUrgent = daysUntilDue >= 0 && daysUntilDue < 7;
 
-  // Determine status color
-  const statusColor = INVOICE_STATUS_COLORS[invoice.status] || 'bg-gray-500/20 text-gray-400';
+  // Determine status color using blockchain status
+  const statusColor = getStatusColor(actualStatus);
+  const statusLabel = getStatusLabel(actualStatus);
 
   // Calculate risk indicator
   const getRiskColor = (score: number) => {
@@ -43,12 +65,14 @@ export function InvoiceCard({
         {/* Header */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
-            <div className="flex items-center gap-2 mb-2">
-              <h3 className="text-xl font-bold text-off-white">
-                {formatCurrency(invoice.amount, 0)}
-              </h3>
-              <div className={`px-2 py-0.5 rounded text-xs font-semibold ${statusColor}`}>
-                {invoice.status.charAt(0).toUpperCase() + invoice.status.slice(1)}
+            <div className="flex flex-col gap-2 mb-2">
+              <CurrencyDisplay
+                inrAmount={invoice.amount}
+                emphasize="avax"
+                className="mb-1"
+              />
+              <div className={`px-2 py-0.5 rounded text-xs font-semibold ${statusColor} self-start`}>
+                {statusLabel}
               </div>
             </div>
             <p className="text-sm text-light-gray">NFT #{invoice.invoice_nft_id}</p>
@@ -82,25 +106,34 @@ export function InvoiceCard({
             isUrgent ? 'text-yellow-400' :
             'text-sage-green-400'
           }`}>
-            {formatDaysUntilDue(dueDate)}
+            {daysUntilDue > 0 ? `${daysUntilDue} days remaining` : isOverdue ? 'Overdue' : 'Due today'}
           </div>
         </div>
 
         {/* Funding Progress */}
         {invoice.status !== 'pending' && (
           <div className="mb-4">
-            <div className="flex items-center justify-between text-sm mb-2">
-              <span className="text-light-gray">Funding Progress</span>
+            <div className="flex items-center justify-between text-sm mb-1">
+              <span className="text-light-gray">Target</span>
               <span className="text-off-white font-semibold">
-                {fundingProgress.toFixed(1)}%
+                ₹{displayTargetAmount.toLocaleString('en-IN')}
+              </span>
+            </div>
+            <div className="flex items-center justify-between text-sm mb-2">
+              <span className="text-light-gray">Raised</span>
+              <span className="text-sage-green-400 font-semibold">
+                ₹{displayRaisedAmount.toLocaleString('en-IN')} ({actualProgress.toFixed(0)}%)
               </span>
             </div>
             <div className="w-full bg-dark-gray rounded-full h-2">
               <div
                 className="bg-sage-green-500 h-2 rounded-full transition-all duration-500"
-                style={{ width: `${Math.min(fundingProgress, 100)}%` }}
+                style={{ width: `${Math.min(actualProgress, 100)}%` }}
               ></div>
             </div>
+            {loadingFunding && (
+              <div className="text-xs text-light-gray mt-1">Syncing...</div>
+            )}
           </div>
         )}
 

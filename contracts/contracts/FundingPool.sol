@@ -1,7 +1,6 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.20;
 
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "./InvoiceNFT.sol";
@@ -9,18 +8,17 @@ import "./ZKCreditOracle.sol";
 
 /**
  * @title FundingPool
- * @dev Manages community funding for invoices
+ * @dev Manages community funding for invoices using native AVAX
  *
  * Flow:
  * 1. MSME lists invoice (must have ZK proof of creditworthiness)
- * 2. Investors fund invoice (USDC deposits)
+ * 2. Investors fund invoice (AVAX deposits)
  * 3. When target reached (80% of invoice amount):
  *    - 80% → MSME immediately
  *    - 20% → Escrow (released when buyer pays)
  * 4. On payment: Interest + principal → Investors (proportional)
  */
 contract FundingPool is ReentrancyGuard {
-    IERC20 public immutable usdc;
     InvoiceNFT public immutable invoiceNFT;
     ZKCreditOracle public immutable creditOracle;
 
@@ -72,15 +70,66 @@ contract FundingPool is ReentrancyGuard {
     );
 
     constructor(
-        address _usdc,
         address _invoiceNFT,
         address _creditOracle,
         address _feeCollector
     ) {
-        usdc = IERC20(_usdc);
         invoiceNFT = InvoiceNFT(_invoiceNFT);
         creditOracle = ZKCreditOracle(_creditOracle);
         feeCollector = _feeCollector;
+    }
+
+    /**
+     * @dev SINGLE-TX INVOICE CREATION - Reduces 4 confirmations to 1!
+     * Combines: commit credit → verify proof → mint NFT → create funding
+     * This is the main function MSMEs should use for uploading invoices
+     */
+    function mintInvoiceAndCreateFunding(
+        // Invoice params
+        uint256 amount,
+        uint256 dueDate,
+        string memory buyerName,
+        bytes32 ipfsHash,
+        uint256 fundingDeadline,
+        uint256 interestRate,
+        // ZK proof params
+        bytes32 creditCommitment,
+        uint256[2] memory proof_a,
+        uint256[2][2] memory proof_b,
+        uint256[2] memory proof_c,
+        uint256[3] memory publicInputs,
+        uint256 minThreshold
+    ) external nonReentrant returns (uint256 invoiceId) {
+        // Step 1: Commit and verify credit score for the MSME (msg.sender)
+        creditOracle.commitCreditScoreFor(msg.sender, creditCommitment);
+        creditOracle.verifyScoreProofFor(msg.sender, proof_a, proof_b, proof_c, publicInputs, minThreshold);
+
+        // Step 2: Mint invoice NFT
+        invoiceId = invoiceNFT.mintInvoice(
+            msg.sender,
+            amount,
+            dueDate,
+            buyerName,
+            ipfsHash,
+            fundingDeadline
+        );
+
+        // Step 3: Create funding round
+        uint256 targetAmount = amount * 80 / 100; // 80% of invoice
+
+        FundingRound storage round = fundingRounds[invoiceId];
+        round.invoiceId = invoiceId;
+        round.targetAmount = targetAmount;
+        round.raisedAmount = 0;
+        round.interestRate = interestRate;
+        round.deadline = fundingDeadline;
+        round.isActive = true;
+        round.isSettled = false;
+
+        // Step 4: Update invoice status to Funding
+        invoiceNFT.updateStatus(invoiceId, InvoiceNFT.InvoiceStatus.Funding);
+
+        emit FundingRoundCreated(invoiceId, targetAmount, interestRate, fundingDeadline);
     }
 
     /**
@@ -128,36 +177,32 @@ contract FundingPool is ReentrancyGuard {
     }
 
     /**
-     * @dev Invest in invoice funding round
+     * @dev Invest in invoice funding round using native AVAX
      * @param invoiceId Invoice to fund
-     * @param amount USDC amount (6 decimals)
      */
-    function invest(uint256 invoiceId, uint256 amount)
+    function invest(uint256 invoiceId)
         external
+        payable
         nonReentrant
     {
         FundingRound storage round = fundingRounds[invoiceId];
         require(round.isActive, "Round not active");
         require(block.timestamp < round.deadline, "Deadline passed");
-        require(amount > 0, "Amount must be > 0");
-        require(round.raisedAmount + amount <= round.targetAmount,
+        require(msg.value > 0, "Amount must be > 0");
+        require(round.raisedAmount + msg.value <= round.targetAmount,
                 "Exceeds target");
-
-        // Transfer USDC from investor
-        require(usdc.transferFrom(msg.sender, address(this), amount),
-                "Transfer failed");
 
         // Record investment
         if (round.investments[msg.sender] == 0) {
             round.investors.push(msg.sender);
         }
-        round.investments[msg.sender] += amount;
-        round.raisedAmount += amount;
+        round.investments[msg.sender] += msg.value;
+        round.raisedAmount += msg.value;
 
         // Update invoice funded amount
-        invoiceNFT.updateFundedAmount(invoiceId, amount);
+        invoiceNFT.updateFundedAmount(invoiceId, msg.value);
 
-        emit InvestmentMade(invoiceId, msg.sender, amount);
+        emit InvestmentMade(invoiceId, msg.sender, msg.value);
 
         // Check if target reached
         if (round.raisedAmount >= round.targetAmount) {
@@ -177,9 +222,10 @@ contract FundingPool is ReentrancyGuard {
         // Get invoice amount
         InvoiceNFT.InvoiceMetadata memory invoice = invoiceNFT.getInvoice(invoiceId);
 
-        // Send 80% to MSME immediately
+        // Send 80% to MSME immediately (in AVAX)
         uint256 msmeAmount = invoice.amount * 80 / 100;
-        require(usdc.transfer(msme, msmeAmount), "Transfer to MSME failed");
+        (bool success, ) = payable(msme).call{value: msmeAmount}("");
+        require(success, "Transfer to MSME failed");
 
         // 20% stays in escrow (released on payment)
 
@@ -192,11 +238,12 @@ contract FundingPool is ReentrancyGuard {
     /**
      * @dev Settle invoice when payment received
      * Distributes principal + interest to investors proportionally
+     * MSME must send AVAX with this call to cover the returns
      * @param invoiceId Invoice ID
-     * @param amountReceived Total amount received from buyer
      */
-    function settleInvoice(uint256 invoiceId, uint256 amountReceived)
+    function settleInvoice(uint256 invoiceId)
         external
+        payable
         nonReentrant
     {
         // Only MSME can call this
@@ -208,33 +255,43 @@ contract FundingPool is ReentrancyGuard {
 
         // Calculate interest based on time held
         InvoiceNFT.InvoiceMetadata memory invoice = invoiceNFT.getInvoice(invoiceId);
-        uint256 daysMissing = (block.timestamp - (invoice.fundingDeadline - 60 days)) / 1 days;
-        uint256 interestAmount = (round.targetAmount * round.interestRate / 10000 * daysMissing) / 365;
+        uint256 daysHeld = (block.timestamp - (invoice.fundingDeadline - 60 days)) / 1 days;
+        if (daysHeld > 365) daysHeld = 365; // Cap at 1 year
+        uint256 interestAmount = (round.raisedAmount * round.interestRate * daysHeld) / (10000 * 365);
 
-        // Platform fee
-        uint256 fee = (round.raisedAmount * platformFee) / 10000;
+        // Platform fee from interest
+        uint256 fee = (interestAmount * platformFee) / 10000;
+
+        // Total needed: principal + interest
+        uint256 totalNeeded = round.raisedAmount + interestAmount;
+        require(msg.value >= totalNeeded, "Insufficient payment");
 
         // Distribute to investors proportionally
         address[] memory investors = round.investors;
         for (uint256 i = 0; i < investors.length; i++) {
             address investor = investors[i];
             uint256 investorShare = round.investments[investor];
-            uint256 proportion = (investorShare * 1e18) / round.targetAmount;
+            uint256 proportion = (investorShare * 1e18) / round.raisedAmount;
 
-            // Principal + interest
-            uint256 investorReturn = (round.targetAmount * proportion / 1e18) +
-                                    (interestAmount * proportion / 1e18);
+            // Principal + proportional interest
+            uint256 investorPrincipal = (round.raisedAmount * proportion) / 1e18;
+            uint256 investorInterest = (interestAmount * proportion) / 1e18;
+            uint256 investorReturn = investorPrincipal + investorInterest;
 
-            require(usdc.transfer(investor, investorReturn), "Transfer failed");
+            (bool success, ) = payable(investor).call{value: investorReturn}("");
+            require(success, "Transfer to investor failed");
         }
 
         // Send fee to fee collector
-        require(usdc.transfer(feeCollector, fee), "Fee transfer failed");
+        if (fee > 0) {
+            (bool feeSuccess, ) = payable(feeCollector).call{value: fee}("");
+            require(feeSuccess, "Fee transfer failed");
+        }
 
         // Update settlement
         round.isSettled = true;
         settlements[invoiceId] = Settlement({
-            principalPaid: round.targetAmount,
+            principalPaid: round.raisedAmount,
             interestPaid: interestAmount,
             timestamp: block.timestamp
         });
@@ -242,7 +299,13 @@ contract FundingPool is ReentrancyGuard {
         // Update invoice status
         invoiceNFT.updateStatus(invoiceId, InvoiceNFT.InvoiceStatus.Paid);
 
-        emit InvoiceSettled(invoiceId, round.targetAmount, interestAmount);
+        emit InvoiceSettled(invoiceId, round.raisedAmount, interestAmount);
+
+        // Refund excess payment
+        if (msg.value > totalNeeded) {
+            (bool refundSuccess, ) = payable(msg.sender).call{value: msg.value - totalNeeded}("");
+            require(refundSuccess, "Refund failed");
+        }
     }
 
     /**
@@ -268,6 +331,48 @@ contract FundingPool is ReentrancyGuard {
     }
 
     /**
+     * @dev Get complete funding information for an invoice
+     */
+    function getFundingInfo(uint256 invoiceId)
+        external
+        view
+        returns (
+            uint256 targetAmount,
+            uint256 raisedAmount,
+            uint256 interestRate,
+            uint256 deadline,
+            bool isActive,
+            bool isSettled,
+            uint256 investorCount
+        )
+    {
+        FundingRound storage round = fundingRounds[invoiceId];
+        return (
+            round.targetAmount,
+            round.raisedAmount,
+            round.interestRate,
+            round.deadline,
+            round.isActive,
+            round.isSettled,
+            round.investors.length
+        );
+    }
+
+    /**
+     * @dev Get funding progress percentage (0-100)
+     */
+    function getFundingProgress(uint256 invoiceId)
+        external
+        view
+        returns (uint256 percentage)
+    {
+        FundingRound storage round = fundingRounds[invoiceId];
+        if (round.targetAmount == 0) return 0;
+        percentage = (round.raisedAmount * 100) / round.targetAmount;
+        if (percentage > 100) percentage = 100;
+    }
+
+    /**
      * @dev Set platform fee
      */
     function setPlatformFee(uint256 newFee) external {
@@ -275,4 +380,9 @@ contract FundingPool is ReentrancyGuard {
         require(newFee <= 1000, "Fee too high"); // Max 10%
         platformFee = newFee;
     }
+
+    /**
+     * @dev Allow contract to receive AVAX
+     */
+    receive() external payable {}
 }

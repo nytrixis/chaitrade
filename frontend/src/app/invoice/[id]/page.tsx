@@ -34,12 +34,25 @@ export default function InvoicePage() {
   const [showFundingModal, setShowFundingModal] = useState(false);
 
   // Fetch invoice from smart contract
-  const { data: onChainInvoice, isError: contractError, refetch: refetchInvoice } = useReadContract({
+  const { data: onChainInvoice, isError: contractError, error: contractErrorDetails, refetch: refetchInvoice } = useReadContract({
     address: CONTRACT_ADDRESSES.InvoiceNFT as `0x${string}`,
     abi: INVOICENFT_ABI,
     functionName: 'getInvoice',
-    args: [BigInt(id as string)],
+    args: id ? [BigInt(id as string)] : undefined,
+    query: {
+      enabled: !!id,
+    },
   });
+
+  // Debug logging
+  useEffect(() => {
+    if (contractError) {
+      console.error('Contract error for invoice', id, ':', contractErrorDetails);
+    }
+    if (onChainInvoice) {
+      console.log('✓ Loaded on-chain invoice', id, ':', onChainInvoice);
+    }
+  }, [contractError, contractErrorDetails, onChainInvoice, id]);
 
   // Fetch funding progress from FundingPool contract
   const { data: fundingData, refetch: refetchFunding } = useReadContract({
@@ -105,11 +118,31 @@ export default function InvoicePage() {
       <div className="min-h-screen bg-charcoal flex items-center justify-center">
         <div className="card max-w-md text-center">
           <div className="text-6xl mb-4">⚠️</div>
-          <h1 className="text-2xl font-bold text-off-white mb-2">Invoice Not Found</h1>
-          <p className="text-light-gray mb-6">{error || 'Could not load invoice from blockchain'}</p>
-          <Link href="/browse" className="btn-primary inline-block">
-            Browse Invoices
-          </Link>
+          <h1 className="text-2xl font-bold text-off-white mb-2">Invoice Not Found on Blockchain</h1>
+          <p className="text-light-gray mb-4">{error || 'Could not load invoice from blockchain'}</p>
+
+          {invoice && (
+            <div className="bg-dark-gray/50 rounded-lg p-4 mb-4 text-left text-sm">
+              <p className="text-yellow-400 mb-2">⚠️ Invoice exists in database but not on blockchain</p>
+              <div className="space-y-1 text-light-gray">
+                <p>Token ID: #{id}</p>
+                <p>Amount: ₹{invoice.amount?.toLocaleString('en-IN')}</p>
+                <p>Buyer: {invoice.buyer_name}</p>
+                <p className="text-xs mt-2 text-yellow-400">
+                  The blockchain transaction may still be processing. Please wait a few moments and refresh.
+                </p>
+              </div>
+            </div>
+          )}
+
+          <div className="flex gap-2 justify-center">
+            <button onClick={() => window.location.reload()} className="btn-secondary">
+              Refresh Page
+            </button>
+            <Link href="/browse" className="btn-primary inline-block">
+              Browse Invoices
+            </Link>
+          </div>
         </div>
       </div>
     );

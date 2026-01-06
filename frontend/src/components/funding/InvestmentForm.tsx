@@ -1,9 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAccount, useWriteContract, useWaitForTransactionReceipt } from "wagmi";
 import { parseUnits } from "viem";
-import { CONTRACT_ADDRESSES, USDC_ABI, FUNDINGPOOL_ABI } from "@/lib/contracts";
+import toast from "react-hot-toast";
+import { CONTRACT_ADDRESSES, FUNDINGPOOL_ABI } from "@/lib/contracts";
+import { formatAVAX, formatINR, inrToAvax, validateInvestmentAmount, calculateReturns } from "@/lib/utils/currency";
 
 export interface InvestmentFormProps {
   invoiceId: number;
@@ -21,7 +23,7 @@ export function InvestmentForm({
   const { isLoading: isConfirming, isSuccess: isConfirmed } = useWaitForTransactionReceipt({ hash });
 
   const [amount, setAmount] = useState("");
-  const [step, setStep] = useState<"input" | "approve" | "invest" | "success">("input");
+  const [step, setStep] = useState<"input" | "invest" | "success">("input");
   const [error, setError] = useState<string | null>(null);
 
   const handleInvest = async (e: React.FormEvent) => {
@@ -37,96 +39,135 @@ export function InvestmentForm({
       return;
     }
 
+    const avaxAmount = parseFloat(amount);
+    const remainingAvax = inrToAvax(targetAmount); // Simplified - in real app, fetch actual remaining from contract
+
+    // Validate amount
+    const validation = validateInvestmentAmount(avaxAmount, remainingAvax);
+    if (!validation.valid) {
+      setError(validation.error || "Invalid amount");
+      return;
+    }
+
     setError(null);
 
     try {
-      const amountInUSDC = parseUnits(amount, 6); // USDC has 6 decimals
-      console.log(`Investing ${amount} USDC in invoice ${invoiceId} from ${address}`);
+      const amountInWei = parseUnits(amount, 18); // AVAX has 18 decimals
+      console.log(`Investing ${amount} AVAX in invoice ${invoiceId} from ${address}`);
 
-      // Step 1: Approve USDC spending
-      setStep("approve");
+      setStep("invest");
       writeContract({
-        address: CONTRACT_ADDRESSES.USDC as `0x${string}`,
-        abi: USDC_ABI,
-        functionName: 'approve',
-        args: [CONTRACT_ADDRESSES.FundingPool as `0x${string}`, amountInUSDC],
+        address: CONTRACT_ADDRESSES.FundingPool as `0x${string}`,
+        abi: FUNDINGPOOL_ABI,
+        functionName: 'invest',
+        args: [BigInt(invoiceId)],
+        value: amountInWei, // Send AVAX with transaction
       });
 
-      console.log('✓ USDC approval requested');
+      console.log('✓ Investment transaction sent');
 
     } catch (err) {
       console.error("Investment failed:", err);
-      setError(err instanceof Error ? err.message : "Investment failed");
+      const errorMessage = err instanceof Error ? err.message : "Investment failed";
+      setError(errorMessage);
+      toast.error(errorMessage);
       setStep("input");
     }
   };
 
-  // Watch for approval confirmation, then invest
-  if (isConfirmed && step === "approve") {
-    setStep("invest");
+  // Watch for investment confirmation and save to database
+  useEffect(() => {
+    if (isConfirmed && step === "invest") {
+      // Save to database
+      (async () => {
+        try {
+          const { recordInvestment } = await import("@/lib/supabase/investments");
+          const { getInvoiceByTokenId } = await import("@/lib/supabase/invoices");
 
-    const amountInUSDC = parseUnits(amount, 6);
-    writeContract({
-      address: CONTRACT_ADDRESSES.FundingPool as `0x${string}`,
-      abi: FUNDINGPOOL_ABI,
-      functionName: 'invest',
-      args: [BigInt(invoiceId), amountInUSDC],
-    });
+          // Get invoice UUID from token ID
+          const invoice = await getInvoiceByTokenId(invoiceId);
 
-    console.log('✓ Investment transaction sent');
-  }
+          if (invoice && invoice.id && address) {
+            await recordInvestment(
+              invoice.id,
+              address as string,
+              parseFloat(amount),
+              interestRate
+            );
+            console.log("✓ Investment saved to database");
+          }
+          toast.success(`Investment of ${amount} AVAX confirmed!`);
+        } catch (error) {
+          console.error("Failed to save investment to database:", error);
+          toast.error("Investment confirmed but failed to save to database");
+        }
+      })();
 
-  // Watch for investment confirmation
-  if (isConfirmed && step === "invest") {
-    setStep("success");
-    setTimeout(() => {
-      setAmount("");
-      setStep("input");
-    }, 3000);
-  }
+      setStep("success");
+      const timer = setTimeout(() => {
+        setAmount("");
+        setStep("input");
+      }, 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [isConfirmed, step, invoiceId, address, amount, interestRate]);
 
-  const estimatedReturn =
-    (parseFloat(amount || "0") * interestRate) / 100 / 12; // Monthly estimate
+  // Calculate returns in AVAX
+  const avaxAmount = parseFloat(amount || "0");
+  const returns = calculateReturns(avaxAmount, interestRate, 60); // 60 days default
 
   return (
     <form onSubmit={handleInvest} className="card space-y-5 border-sage-green-500/20">
       <div>
-        <h3 className="text-xl font-bold mb-4 text-off-white">Make Investment</h3>
+        <h3 className="text-xl font-bold mb-2 text-off-white">Make Investment</h3>
+        <p className="text-xs text-light-gray mb-4">
+          💎 Invest using AVAX on Avalanche network
+        </p>
+
         <label className="block text-sm font-semibold mb-3 text-light-gray">
-          Investment Amount (USDC)
+          Investment Amount (AVAX)
         </label>
         <input
           type="number"
           value={amount}
           onChange={(e) => setAmount(e.target.value)}
-          placeholder="e.g., 5000"
-          step="0.01"
-          min="0"
+          placeholder="e.g., 0.1 (min: 0.001)"
+          step="0.001"
+          min="0.001"
           className="input w-full text-lg"
           disabled={isPending || isConfirming}
         />
         <p className="text-xs text-light-gray mt-2">
-          Target amount: ₹{targetAmount.toLocaleString()}
+          1 AVAX ≈ {formatINR(3000)} • Target: {formatINR(targetAmount)} ({formatAVAX(inrToAvax(targetAmount))})
         </p>
       </div>
 
-      {amount && (
+      {amount && avaxAmount > 0 && (
         <div className="bg-sage-green-500/10 border border-sage-green-500/20 rounded-lg p-4">
           <p className="text-base font-bold text-sage-green-400 mb-3">
-            💰 Estimated Returns
+            💰 Estimated Returns (60 days)
           </p>
           <div className="text-sm text-light-gray space-y-2">
             <div className="flex justify-between">
               <span>Investment:</span>
-              <span className="text-off-white font-semibold">₹{parseFloat(amount).toLocaleString()}</span>
+              <span className="text-off-white font-semibold">{formatAVAX(returns.principal)}</span>
             </div>
             <div className="flex justify-between">
-              <span>Interest Rate:</span>
-              <span className="text-off-white font-semibold">{interestRate}% APR</span>
+              <span className="text-xs text-light-gray">({formatINR(returns.principalINR)})</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Interest ({interestRate}% APR):</span>
+              <span className="text-sage-green-400 font-semibold">{formatAVAX(returns.interest)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-xs text-light-gray">({formatINR(returns.interestINR)})</span>
             </div>
             <div className="flex justify-between pt-2 border-t border-sage-green-500/20">
-              <span>Monthly Estimate:</span>
-              <span className="text-sage-green-400 font-bold">₹{estimatedReturn.toFixed(2)}</span>
+              <span>Total Return:</span>
+              <span className="text-sage-green-400 font-bold">{formatAVAX(returns.total)}</span>
+            </div>
+            <div className="flex justify-between">
+              <span className="text-xs text-light-gray">({formatINR(returns.totalINR)})</span>
             </div>
           </div>
         </div>
@@ -134,11 +175,9 @@ export function InvestmentForm({
 
       <button
         type="submit"
-        disabled={!amount || isPending || isConfirming || !isConnected || step === "success"}
+        disabled={!amount || parseFloat(amount) < 0.001 || isPending || isConfirming || !isConnected || step === "success"}
         className="btn-primary w-full"
       >
-        {step === "approve" && isPending && "Approve USDC in Wallet..."}
-        {step === "approve" && isConfirming && "Approving USDC..."}
         {step === "invest" && isPending && "Confirm Investment in Wallet..."}
         {step === "invest" && isConfirming && "Investing..."}
         {step === "success" && "✓ Investment Successful!"}

@@ -2,29 +2,50 @@
 
 import { useState } from "react";
 import { useAccount } from "wagmi";
+import { useInvoiceFunding } from "@/hooks/useInvoiceFunding";
 
 export interface FundingProgressProps {
   invoiceId: number;
-  targetAmount: number;
-  raisedAmount: number;
-  interestRate: number;
-  deadline: Date;
+  targetAmount?: number; // Optional fallback
+  raisedAmount?: number; // Optional fallback
+  interestRate?: number; // Optional fallback
+  deadline?: Date; // Optional fallback
 }
 
 export function FundingProgress({
   invoiceId,
-  targetAmount,
-  raisedAmount,
-  interestRate,
-  deadline,
+  targetAmount: fallbackTarget,
+  raisedAmount: fallbackRaised,
+  interestRate: fallbackInterestRate,
+  deadline: fallbackDeadline,
 }: FundingProgressProps) {
   const [investAmount, setInvestAmount] = useState("");
   const { isConnected } = useAccount();
 
-  const percentage = (raisedAmount / targetAmount) * 100;
-  const remainingAmount = targetAmount - raisedAmount;
+  // Fetch real-time data from blockchain
+  const {
+    totalFundedInr,
+    targetAmountInr,
+    remainingInr,
+    percentage,
+    interestRate: blockchainInterestRate,
+    deadline: blockchainDeadline,
+    isLoading,
+  } = useInvoiceFunding(invoiceId);
+
+  // Use blockchain data if available, otherwise fallback to props
+  const actualTarget = targetAmountInr || fallbackTarget || 0;
+  const actualRaised = totalFundedInr || fallbackRaised || 0;
+  const actualPercentage = isLoading ? 0 : percentage;
+  const actualInterestRate = blockchainInterestRate || fallbackInterestRate || 18;
+  const actualRemainingAmount = remainingInr || (actualTarget - actualRaised);
+
+  const actualDeadline = blockchainDeadline
+    ? new Date(blockchainDeadline * 1000)
+    : fallbackDeadline || new Date();
+
   const daysLeft = Math.ceil(
-    (deadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+    (actualDeadline.getTime() - Date.now()) / (1000 * 60 * 60 * 24)
   );
 
   const handleInvest = async () => {
@@ -34,7 +55,7 @@ export function FundingProgress({
     }
 
     // TODO: Call smart contract
-    console.log(`Investing ${investAmount} USDC in invoice ${invoiceId}`);
+    console.log(`Investing ${investAmount} AVAX in invoice ${invoiceId}`);
   };
 
   return (
@@ -50,20 +71,21 @@ export function FundingProgress({
       <div>
         <div className="flex justify-between text-sm mb-3">
           <span className="text-off-white font-medium">
-            ₹{raisedAmount.toLocaleString()} raised
+            ₹{actualRaised.toLocaleString()} raised
           </span>
           <span className="text-light-gray">
-            ₹{targetAmount.toLocaleString()} target
+            ₹{actualTarget.toLocaleString()} target
           </span>
         </div>
         <div className="w-full bg-medium-gray/30 rounded-full h-4 overflow-hidden">
           <div
             className="bg-gradient-to-r from-sage-green-500 to-sage-green-400 h-4 rounded-full transition-all duration-500 shadow-lg"
-            style={{ width: `${Math.min(percentage, 100)}%` }}
+            style={{ width: `${Math.min(actualPercentage, 100)}%` }}
           ></div>
         </div>
         <p className="text-base text-sage-green-400 mt-3 font-bold">
-          {Math.round(percentage)}% funded
+          {Math.round(actualPercentage)}% funded
+          {isLoading && <span className="text-xs text-light-gray ml-2">(updating...)</span>}
         </p>
       </div>
 
@@ -72,7 +94,7 @@ export function FundingProgress({
         <div className="bg-dark-gray/50 rounded-lg p-4 border border-medium-gray/20">
           <p className="text-xs text-light-gray mb-2 font-medium">Interest Rate</p>
           <p className="text-2xl font-bold text-sage-green-400">
-            {interestRate}%
+            {actualInterestRate}%
           </p>
           <p className="text-xs text-light-gray mt-1">APR</p>
         </div>
@@ -92,11 +114,11 @@ export function FundingProgress({
             type="number"
             value={investAmount}
             onChange={(e) => setInvestAmount(e.target.value)}
-            placeholder="Amount (USDC)"
+            placeholder="Amount (AVAX)"
             className="input w-full"
           />
           <p className="text-xs text-light-gray">
-            Remaining to fund: ₹{remainingAmount.toLocaleString()}
+            Remaining to fund: ₹{actualRemainingAmount.toLocaleString()}
           </p>
           <button
             onClick={handleInvest}

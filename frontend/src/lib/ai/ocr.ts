@@ -175,8 +175,84 @@ function isExcludedNumber(line: string): boolean {
 function parseInvoiceText(text: string): ExtractedInvoiceData {
   const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 0);
 
+  console.log('=== OCR Amount Extraction Debug ===');
+  console.log('Total lines to process:', lines.length);
+
   // Extract amount with multiple strategies and confidence scores
   const amountMatches: AmountMatch[] = [];
+  
+  // Track line item amounts for summing if total is corrupted
+  const lineItemAmounts: number[] = [];
+  
+  // First pass: collect all Indian-format numbers (X,XX,XXX pattern)
+  // Strategy: For invoice line items, ONLY take the rightmost (last) number
+  // This avoids counting quantity/rate columns like "500 800 4,00,000"
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    
+    // Match Indian number format: 1,00,000 or 4,00,000 or 10,00,000
+    // Pattern: digit(s), then pairs of digits separated by commas
+    const indianNumberMatches = Array.from(line.matchAll(/(\d{1,2},(?:\d{2},)*\d{3})/g));
+    
+    if (indianNumberMatches.length > 0) {
+      console.log(`Line ${i}: "${line}" - found ${indianNumberMatches.length} Indian format number(s)`);
+    }
+    
+    // Filter valid amounts (10K to 10 crore)
+    const validMatches = indianNumberMatches.filter((match) => {
+      const numStr = match[1].replace(/,/g, '');
+      const num = parseFloat(numStr);
+      return num >= 10000 && num <= 100000000;
+    });
+    
+    if (validMatches.length === 0) continue;
+    
+    // CRITICAL: Only process the LAST (rightmost) number from each line
+    // In "Industrial Packaging Boxes 500 800 4,00,000", only use 4,00,000
+    // In "Logistics & Handling 1 1,00,000 1,00,000", only use the second 1,00,000
+    const lastMatch = validMatches[validMatches.length - 1];
+    const numStr = lastMatch[1].replace(/,/g, '');
+    const num = parseFloat(numStr);
+    
+    console.log(`  Using rightmost number: ${lastMatch[1]} = ₹${num.toLocaleString()}`);
+    if (validMatches.length > 1) {
+      console.log(`  (Skipped ${validMatches.length - 1} other number(s) - likely qty/rate columns)`);
+    }
+    
+    // Check if this is a line item (has description text before the number)
+    const beforeNumber = line.substring(0, lastMatch.index || 0).trim();
+    const isLineItem = beforeNumber.length > 3 && !beforeNumber.match(/^(?:total|grand|amount|balance)/i);
+    
+    if (isLineItem) {
+      lineItemAmounts.push(num);
+      console.log(`    → Added as LINE ITEM`);
+    }
+    
+    // Check if this line mentions "total"
+    if (line.match(/total/i)) {
+      amountMatches.push({
+        amount: num,
+        confidence: 0.95,
+        source: 'indian_format_total',
+        line
+      });
+      console.log(`    → Added as TOTAL MATCH (confidence: 0.95)`);
+    } else {
+      amountMatches.push({
+        amount: num,
+        confidence: 0.6,
+        source: 'indian_format_number',
+        line
+      });
+      console.log(`    → Added as GENERIC MATCH (confidence: 0.6)`);
+    }
+  }
+  
+  console.log('=== Line Items Found:', lineItemAmounts.length, '===');
+  if (lineItemAmounts.length > 0) {
+    console.log('Line item amounts:', lineItemAmounts.map(a => `₹${a.toLocaleString()}`).join(', '));
+    console.log('Sum of line items:', `₹${lineItemAmounts.reduce((a, b) => a + b, 0).toLocaleString()}`);
+  }
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
@@ -252,14 +328,50 @@ function parseInvoiceText(text: string): ExtractedInvoiceData {
     return b.amount - a.amount;
   });
 
-  // Get best match
-  let amount = 0;
+  console.log('=== Amount Match Results ===');
+  console.log('Total matches found:', amountMatches.length);
   if (amountMatches.length > 0) {
-    amount = amountMatches[0].amount;
-    console.log(`Best amount match: ₹${amount} (confidence: ${amountMatches[0].confidence}, source: ${amountMatches[0].source})`);
-    console.log('All matches:', amountMatches.map(m => `₹${m.amount} (${m.confidence})`).join(', '));
+    console.log('All matches:', amountMatches.map(m => `₹${m.amount.toLocaleString()} (conf: ${m.confidence}, src: ${m.source})`).join('\n  '));
   }
 
+  // Determine final amount using priority logic
+  let amount = 0;
+  let amountSource = 'none';
+  
+  // Priority 1: High-confidence total match (confidence >= 0.9)
+  const highConfidenceMatch = amountMatches.find(m => m.confidence >= 0.9);
+  if (highConfidenceMatch) {
+    amount = highConfidenceMatch.amount;
+    amountSource = `high_confidence_${highConfidenceMatch.source}`;
+    console.log(`✓ Using high-confidence match: ₹${amount.toLocaleString()} (${highConfidenceMatch.source})`);
+  }
+  
+  // Priority 2: Sum of line items (if we have 2+ line items, their sum is likely the total)
+  if (amount === 0 && lineItemAmounts.length >= 2) {
+    amount = lineItemAmounts.reduce((sum, item) => sum + item, 0);
+    amountSource = 'line_item_sum';
+    console.log(`✓ Using sum of ${lineItemAmounts.length} line items: ₹${amount.toLocaleString()}`);
+    console.log('  Line items:', lineItemAmounts.map(a => `₹${a.toLocaleString()}`).join(' + '));
+  }
+  
+  // Priority 3: Single line item or largest number found
+  if (amount === 0 && amountMatches.length > 0) {
+    // Get the largest amount from all matches
+    const sortedByAmount = [...amountMatches].sort((a, b) => b.amount - a.amount);
+    amount = sortedByAmount[0].amount;
+    amountSource = `largest_match_${sortedByAmount[0].source}`;
+    console.log(`✓ Using largest match as fallback: ₹${amount.toLocaleString()}`);
+  }
+  
+  // Priority 4: If we have exactly 1 line item, use it
+  if (amount === 0 && lineItemAmounts.length === 1) {
+    amount = lineItemAmounts[0];
+    amountSource = 'single_line_item';
+    console.log(`✓ Using single line item: ₹${amount.toLocaleString()}`);
+  }
+
+  console.log(`=== Final Amount: ₹${amount.toLocaleString()} (source: ${amountSource}) ===`);
+  
   // Fallback: Look for any 5-7 digit number (likely in lakhs range)
   if (amount === 0) {
     for (const line of lines) {

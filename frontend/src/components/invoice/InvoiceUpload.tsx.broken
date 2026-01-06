@@ -1,0 +1,356 @@
+"use client";
+
+import { useState } from "react";
+import { useAccount, usePublicClient, useWalletClient } from "wagmi";
+import { parseUnits, encodePacked, keccak256, decodeEventLog } from "viem";
+import { uploadToPinata } from "@/lib/pinata/upload";
+import { extractInvoiceData, validateInvoiceData } from "@/lib/ai/ocr";
+import { generateCreditScoreProof, calculateCreditScore, commitmentToBytes32 } from "@/lib/zk/generateProof";
+import { createInvoice } from "@/lib/supabase/invoices";
+import { isSupabaseConfigured } from "@/lib/supabase/client";
+import { AVAX_TO_INR_RATE } from "@/lib/utils/currency";
+import toast from "react-hot-toast";
+import { ConnectButton } from "@/components/ConnectButton";
+import {
+  CONTRACT_ADDRESSES,
+  INVOICENFT_ABI,
+  FUNDINGPOOL_ABI
+} from "@/lib/contracts";
+
+export interface InvoiceUploadProps {
+  onSuccess?: (invoiceData: any) => void;
+  onUploadSuccess?: (invoiceData: any) => void;
+  onManualEntry?: () => void;
+}
+
+type Step = "upload" | "extract" | "zkproof" | "mint" | "success";
+
+export function InvoiceUpload({ onSuccess, onUploadSuccess, onManualEntry }: InvoiceUploadProps) {
+  const { address, isConnected } = useAccount();
+  const publicClient = usePublicClient();
+  const { data: walletClient } = useWalletClient();
+
+  const [step, setStep] = useState<Step>("upload");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [statusMessage, setStatusMessage] = useState<string>("");
+  const [invoiceData, setInvoiceData] = useState<any>(null);
+  const [creditScore, setCreditScore] = useState<number | null>(null);
+  const [nftTokenId, setNftTokenId] = useState<number | null>(null);
+
+  // Removed early return - let Wagmi handle auto-reconnect
+//   if (!isConnected) {
+//     return (
+//       <div className="card">
+//         <p className="text-center text-light-gray">
+//           Please connect your wallet to upload an invoice.
+//         </p>
+//       </div>
+//     );
+//   }
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !walletClient || !publicClient || !address) return;
+
+    const validTypes = ['image/jpeg', 'image/jpg', 'image/png', 'application/pdf'];
+    if (!validTypes.includes(file.type)) {
+      setError('Please upload a valid invoice file (JPG, PNG, or PDF)');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      // Step 1: OCR extraction
+      setStep("extract");
+      setStatusMessage("Extracting invoice data...");
+      const extracted = await extractInvoiceData(file);
+      const { valid, errors } = validateInvoiceData(extracted);
+      if (!valid) {
+        throw new Error(`Validation failed: ${errors.join(", ")}`);
+      }
+      setInvoiceData(extracted);
+      console.log('✓ Extracted invoice data:', extracted);
+
+      // Step 2: Upload to IPFS
+      setStatusMessage("Uploading to IPFS...");
+      const ipfsCID = await uploadToPinata(file, {
+        invoiceNumber: extracted.invoiceNumber,
+        buyerName: extracted.buyerName,
+        amount: extracted.amount.toString(),
+      });
+      console.log('✓ Uploaded to IPFS:', ipfsCID);
+
+      // Step 3: Generate ZK proof
+      setStep("zkproof");
+      setStatusMessage("Generating zero-knowledge proof...");
+      const score = await calculateCreditScore(address);
+      setCreditScore(score);
+      const minThreshold = 650;
+      
+      const zkProof = await generateCreditScoreProof(
+        score,
+        minThreshold,
+        '/zk/credit_score_range.wasm',
+        '/zk/credit_score_range_final.zkey'
+      );
+      console.log('✓ Generated ZK proof, score:', score);
+
+      // Step 4: Mint invoice and create funding round in ONE transaction
+      setStep("mint");
+      setStatusMessage("Creating invoice on blockchain (1 confirmation)...");
+      
+      const ipfsBytes32 = keccak256(encodePacked(['string'], [ipfsCID]));
+      const fundingDeadline = BigInt(Math.floor(Date.now() / 1000) + 7 * 24 * 60 * 60);
+      const dueTimestamp = BigInt(Math.floor(new Date(extracted.dueDate).getTime() / 1000));
+      
+      // Convert INR amount to AVAX (1 AVAX = ₹3000)
+      const amountInAvax = extracted.amount / AVAX_TO_INR_RATE;
+      const amountWei = parseUnits(amountInAvax.toFixed(18), 18);
+      
+      const commitmentBytes32 = commitmentToBytes32(zkProof.commitment);
+      const { formattedForContract } = zkProof;
+      const interestRate = 1800; // 18% in basis points
+
+      // Single batch transaction - only ONE MetaMask confirmation!
+      const txHash = await walletClient.writeContract({
+        address: CONTRACT_ADDRESSES.FundingPool as `0x${string}`,
+        abi: FUNDINGPOOL_ABI,
+        functionName: 'mintInvoiceAndCreateFunding',
+        args: [
+          amountWei,                              // amount
+          dueTimestamp,                           // dueDate
+          extracted.buyerName,                    // buyerName
+          ipfsBytes32,                            // ipfsHash
+          fundingDeadline,                        // fundingDeadline
+          BigInt(interestRate),                   // interestRate (18%)
+          commitmentBytes32,                      // creditCommitment
+          formattedForContract.proof_a,           // proof_a
+          formattedForContract.proof_b,           // proof_b
+          formattedForContract.proof_c,           // proof_c
+          formattedForContract.publicInputs,      // publicInputs
+          BigInt(minThreshold),                   // minThreshold (650)
+        ],
+      });
+      console.log('✓ Batch transaction sent:', txHash);
+      
+      setStatusMessage("Waiting for confirmation...");
+      const receipt = await publicClient.waitForTransactionReceipt({ hash: txHash });
+      console.log('✓ Transaction confirmed');
+      console.log('Receipt logs count:', receipt.logs.length);
+      receipt.logs.forEach((log, i) => console.log(`Event ${i}:`, log.topics[0]?.slice(0, 10) + '...'));
+
+      // Extract invoice ID from FundingRoundCreated event
+      let tokenId: number | null = null;
+      for (const log of receipt.logs) {
+        try {
+          const decoded = decodeEventLog({
+            abi: FUNDINGPOOL_ABI,
+            data: log.data,
+            topics: log.topics,
+          });
+          if (decoded.eventName === 'FundingRoundCreated') {
+            tokenId = Number((decoded.args as any).invoiceId);
+            console.log('✓ Found FundingRoundCreated, invoiceId:', tokenId);
+            break;
+          }
+        } catch { 
+          // Try InvoiceMinted event as fallback
+          try {
+            const decoded = decodeEventLog({
+              abi: INVOICENFT_ABI,
+              data: log.data,
+              topics: log.topics,
+            });
+            if (decoded.eventName === 'InvoiceMinted') {
+              tokenId = Number((decoded.args as any).tokenId);
+              console.log('✓ Found InvoiceMinted, tokenId:', tokenId);
+              break;
+            }
+          } catch { continue; }
+        }
+      }
+
+      if (tokenId === null) {
+        console.warn('⚠️  Could not parse events, trying fallback...');
+        try {
+          const latestId = await publicClient.readContract({
+            address: CONTRACT_ADDRESSES.InvoiceNFT as `0x${string}`,
+            abi: [{ inputs: [], name: 'tokenCounter', outputs: [{ type: 'uint256' }], stateMutability: 'view', type: 'function' }],
+            functionName: 'tokenCounter',
+          }) as bigint;
+          tokenId = Number(latestId) - 1;
+          console.log('✓ Got tokenId via fallback:', tokenId);
+        } catch (fallbackError) {
+          console.error('Fallback failed:', fallbackError);
+          throw new Error('Could not get invoice ID');
+        }
+      }
+      setNftTokenId(tokenId);
+      console.log('✓ Invoice ID:', tokenId);
+
+      // Step 8: Save to database
+      setStatusMessage("Saving to database...");
+      if (isSupabaseConfigured) {
+        await createInvoice({
+          msme_address: address.toLowerCase(),
+          invoice_nft_id: tokenId,
+          amount: extracted.amount,
+          buyer_name: extracted.buyerName,
+          due_date: extracted.dueDate,
+          ipfs_cid: ipfsCID,
+          credit_score: score,
+          status: 'active',
+        });
+        console.log('✓ Saved to database with status: active');
+        // ✅ NEW: Save credit score history for enhanced scoring
+        try {
+          const { saveCreditScoreHistory, calculateEnhancedCreditScore } = await import('@/lib/supabase/credit-history');
+          const enhancedScore = await calculateEnhancedCreditScore(score, address);
+          await saveCreditScoreHistory(address, enhancedScore, invoiceData.id);
+          console.log('✓ Credit score history saved');
+        } catch (error) {
+          console.error('Failed to save credit score history:', error);
+        }
+
+      }
+
+      // Success!
+      setStep("success");
+      setStatusMessage("");
+      setLoading(false);
+      
+      toast.success(`Invoice #${tokenId} created successfully!`, {
+        duration: 5000,
+      });
+
+      const successData = {
+        ...extracted,
+        ipfsCID,
+        creditScore: score,
+        nftTokenId: tokenId,
+        address,
+      };
+
+      if (onSuccess) onSuccess(successData);
+      if (onUploadSuccess) onUploadSuccess(successData);
+
+    } catch (err) {
+      console.error('Upload error:', err);
+      const errorMessage = err instanceof Error ? err.message : "Unknown error";
+      setError(errorMessage);
+      toast.error(`Upload failed: ${errorMessage}`);
+      setStep("upload");
+      setLoading(false);
+    }
+  };
+
+  const getStepNumber = (s: Step): number => {
+    const steps: Step[] = ["upload", "extract", "zkproof", "mint", "success"];
+    return steps.indexOf(s) + 1;
+  };
+
+  return (
+    <div className="card space-y-6">
+      <div>
+        <h3 className="text-2xl font-bold mb-2 text-off-white">Upload Invoice</h3>
+        <p className="text-base text-light-gray">
+          Upload an invoice image. We'll extract the details and verify your creditworthiness using zero-knowledge proofs.
+        </p>
+      </div>
+
+      {/* Progress indicator */}
+      {loading && (
+        <div className="bg-sage-green-500/10 border border-sage-green-500/30 rounded-lg p-4">
+          <div className="flex items-center gap-3 mb-2">
+            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-sage-green-500"></div>
+            <span className="text-sage-green-400 font-semibold">Step {getStepNumber(step)} of 5</span>
+          </div>
+          <p className="text-light-gray text-sm mb-2">{statusMessage}</p>
+          {step === "mint" && (
+            <p className="text-xs text-light-gray/70 italic">
+              💡 Please confirm the transaction in your wallet. This single transaction creates your invoice and opens funding.
+            </p>
+          )}
+        </div>
+      )}
+
+      {/* Success state */}
+      {step === "success" && (
+        <div className="bg-sage-green-500/20 border border-sage-green-500/50 rounded-lg p-6 text-center">
+          <div className="text-4xl mb-3">✅</div>
+          <h4 className="text-xl font-bold text-sage-green-400 mb-2">Invoice Listed Successfully!</h4>
+          <p className="text-light-gray">
+            NFT #{nftTokenId} is now available for funding on the marketplace.
+          </p>
+          <p className="text-sm text-light-gray mt-2">Credit Score: {creditScore}</p>
+          <button
+            onClick={() => {
+              setStep("upload");
+              setNftTokenId(null);
+              setInvoiceData(null);
+            }}
+            className="btn-secondary mt-4"
+          >
+            Upload Another Invoice
+          </button>
+        </div>
+      )}
+
+      {/* Upload form */}
+      {step === "upload" && !loading && (
+        <div className="border-2 border-dashed border-medium-gray rounded-lg p-8 text-center hover:border-sage-green-500/50 transition-colors">
+          <input
+            type="file"
+            id="invoice-upload"
+            accept=".jpg,.jpeg,.png,.pdf"
+            onChange={handleFileUpload}
+            className="hidden"
+          />
+          <label
+            htmlFor="invoice-upload"
+            className="cursor-pointer block"
+          >
+            <div className="text-4xl mb-4">📄</div>
+            <p className="text-lg font-semibold text-off-white mb-2">
+              Click to upload invoice
+            </p>
+            <p className="text-sm text-light-gray">
+              Supports JPG, PNG, or PDF files
+            </p>
+          </label>
+        </div>
+      )}
+
+      {/* Error display */}
+      {error && (
+        <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-4">
+          <p className="text-red-400">{error}</p>
+          <button
+            onClick={() => {
+              setError(null);
+              setStep("upload");
+            }}
+            className="text-sm text-red-400 underline mt-2"
+          >
+            Try again
+          </button>
+        </div>
+      )}
+
+      {/* Manual entry option */}
+      {onManualEntry && step === "upload" && !loading && (
+        <div className="text-center pt-4 border-t border-medium-gray/30">
+          <button
+            onClick={onManualEntry}
+            className="text-sage-green-500 hover:text-sage-green-400 text-sm"
+          >
+            Or enter invoice details manually →
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}

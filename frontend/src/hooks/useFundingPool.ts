@@ -46,6 +46,7 @@ export function useInvest() {
       abi: FUNDINGPOOL_ABI,
       functionName: 'invest',
       args: [BigInt(invoiceId), amount],
+      value: amount, // Send AVAX with transaction
     });
   };
 
@@ -95,28 +96,8 @@ export function useSettleInvoice() {
 export function useFundingInfo(invoiceId: bigint | number | undefined) {
   const { data, isError, isLoading, refetch } = useReadContract({
     address: CONTRACT_ADDRESSES.FundingPool as `0x${string}`,
-    abi: [
-      {
-        inputs: [{ name: 'invoiceId', type: 'uint256' }],
-        name: 'getFundingInfo',
-        outputs: [
-          {
-            components: [
-              { name: 'totalFunded', type: 'uint256' },
-              { name: 'interestRate', type: 'uint256' },
-              { name: 'fundingDeadline', type: 'uint256' },
-              { name: 'isActive', type: 'bool' },
-              { name: 'isSettled', type: 'bool' },
-            ],
-            name: '',
-            type: 'tuple',
-          },
-        ],
-        stateMutability: 'view',
-        type: 'function',
-      },
-    ],
-    functionName: 'getFundingInfo',
+    abi: FUNDINGPOOL_ABI,
+    functionName: 'fundingRounds',
     args: invoiceId !== undefined ? [BigInt(invoiceId)] : undefined,
   });
 
@@ -134,15 +115,7 @@ export function useFundingInfo(invoiceId: bigint | number | undefined) {
 export function useInvestors(invoiceId: bigint | number | undefined) {
   const { data, isError, isLoading, refetch } = useReadContract({
     address: CONTRACT_ADDRESSES.FundingPool as `0x${string}`,
-    abi: [
-      {
-        inputs: [{ name: 'invoiceId', type: 'uint256' }],
-        name: 'getInvestors',
-        outputs: [{ name: '', type: 'address[]' }],
-        stateMutability: 'view',
-        type: 'function',
-      },
-    ],
+    abi: FUNDINGPOOL_ABI,
     functionName: 'getInvestors',
     args: invoiceId !== undefined ? [BigInt(invoiceId)] : undefined,
   });
@@ -161,18 +134,7 @@ export function useInvestors(invoiceId: bigint | number | undefined) {
 export function useInvestmentAmount(invoiceId: bigint | number | undefined, investor: `0x${string}` | undefined) {
   const { data, isError, isLoading } = useReadContract({
     address: CONTRACT_ADDRESSES.FundingPool as `0x${string}`,
-    abi: [
-      {
-        inputs: [
-          { name: 'invoiceId', type: 'uint256' },
-          { name: 'investor', type: 'address' },
-        ],
-        name: 'getInvestmentAmount',
-        outputs: [{ name: '', type: 'uint256' }],
-        stateMutability: 'view',
-        type: 'function',
-      },
-    ],
+    abi: FUNDINGPOOL_ABI,
     functionName: 'getInvestmentAmount',
     args: invoiceId !== undefined && investor ? [BigInt(invoiceId), investor] : undefined,
   });

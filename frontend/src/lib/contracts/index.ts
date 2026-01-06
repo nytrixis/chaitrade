@@ -64,6 +64,26 @@ export const INVOICENFT_ABI = [
 export const FUNDINGPOOL_ABI = [
   {
     inputs: [
+      { name: 'amount', type: 'uint256' },
+      { name: 'dueDate', type: 'uint256' },
+      { name: 'buyerName', type: 'string' },
+      { name: 'ipfsHash', type: 'bytes32' },
+      { name: 'fundingDeadline', type: 'uint256' },
+      { name: 'interestRate', type: 'uint256' },
+      { name: 'creditCommitment', type: 'bytes32' },
+      { name: 'proof_a', type: 'uint256[2]' },
+      { name: 'proof_b', type: 'uint256[2][2]' },
+      { name: 'proof_c', type: 'uint256[2]' },
+      { name: 'publicInputs', type: 'uint256[3]' },
+      { name: 'minThreshold', type: 'uint256' },
+    ],
+    name: 'mintInvoiceAndCreateFunding',
+    outputs: [{ name: 'invoiceId', type: 'uint256' }],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
       { name: 'invoiceId', type: 'uint256' },
       { name: 'interestRate', type: 'uint256' },
     ],
@@ -75,22 +95,104 @@ export const FUNDINGPOOL_ABI = [
   {
     inputs: [
       { name: 'invoiceId', type: 'uint256' },
-      { name: 'amount', type: 'uint256' },
     ],
     name: 'invest',
     outputs: [],
-    stateMutability: 'nonpayable',
+    stateMutability: 'payable',
     type: 'function',
   },
   {
     inputs: [
       { name: 'invoiceId', type: 'uint256' },
-      { name: 'amountReceived', type: 'uint256' },
     ],
     name: 'settleInvoice',
     outputs: [],
-    stateMutability: 'nonpayable',
+    stateMutability: 'payable',
     type: 'function',
+  },
+  {
+    inputs: [{ name: '', type: 'uint256' }],
+    name: 'fundingRounds',
+    outputs: [
+      { name: 'invoiceId', type: 'uint256' },
+      { name: 'targetAmount', type: 'uint256' },
+      { name: 'raisedAmount', type: 'uint256' },
+      { name: 'interestRate', type: 'uint256' },
+      { name: 'deadline', type: 'uint256' },
+      { name: 'isActive', type: 'bool' },
+      { name: 'isSettled', type: 'bool' },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [{ name: 'invoiceId', type: 'uint256' }],
+    name: 'getInvestors',
+    outputs: [{ name: '', type: 'address[]' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { name: 'invoiceId', type: 'uint256' },
+      { name: 'investor', type: 'address' },
+    ],
+    name: 'getInvestmentAmount',
+    outputs: [{ name: '', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [{ name: 'invoiceId', type: 'uint256' }],
+    name: 'getFundingInfo',
+    outputs: [
+      { name: 'targetAmount', type: 'uint256' },
+      { name: 'raisedAmount', type: 'uint256' },
+      { name: 'interestRate', type: 'uint256' },
+      { name: 'deadline', type: 'uint256' },
+      { name: 'isActive', type: 'bool' },
+      { name: 'isSettled', type: 'bool' },
+      { name: 'investorCount', type: 'uint256' },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [{ name: 'invoiceId', type: 'uint256' }],
+    name: 'getFundingProgress',
+    outputs: [{ name: 'percentage', type: 'uint256' }],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, name: 'invoiceId', type: 'uint256' },
+      { indexed: true, name: 'investor', type: 'address' },
+      { indexed: false, name: 'amount', type: 'uint256' },
+    ],
+    name: 'InvestmentMade',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, name: 'invoiceId', type: 'uint256' },
+      { indexed: false, name: 'totalRaised', type: 'uint256' },
+    ],
+    name: 'FundingCompleted',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, name: 'invoiceId', type: 'uint256' },
+      { indexed: false, name: 'targetAmount', type: 'uint256' },
+      { indexed: false, name: 'interestRate', type: 'uint256' },
+      { indexed: false, name: 'deadline', type: 'uint256' },
+    ],
+    name: 'FundingRoundCreated',
+    type: 'event',
   },
 ];
 
@@ -99,6 +201,19 @@ export const ZKCREDITOACLE_ABI = [
     inputs: [{ name: 'commitment', type: 'bytes32' }],
     name: 'commitCreditScore',
     outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      { name: 'proof_a', type: 'uint256[2]' },
+      { name: 'proof_b', type: 'uint256[2][2]' },
+      { name: 'proof_c', type: 'uint256[2]' },
+      { name: 'publicInputs', type: 'uint256[3]' },
+      { name: 'minScore', type: 'uint256' },
+    ],
+    name: 'verifyScoreProof',
+    outputs: [{ name: '', type: 'bool' }],
     stateMutability: 'nonpayable',
     type: 'function',
   },
@@ -126,6 +241,24 @@ export const ZKCREDITOACLE_ABI = [
     ],
     stateMutability: 'view',
     type: 'function',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, name: 'msme', type: 'address' },
+      { indexed: false, name: 'commitment', type: 'bytes32' },
+    ],
+    name: 'CommitmentSubmitted',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, name: 'msme', type: 'address' },
+      { indexed: false, name: 'minScore', type: 'uint256' },
+    ],
+    name: 'ProofVerified',
+    type: 'event',
   },
 ];
 

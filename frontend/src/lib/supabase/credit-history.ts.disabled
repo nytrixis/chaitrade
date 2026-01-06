@@ -1,0 +1,155 @@
+import { supabase } from './client';
+
+export interface CreditScoreHistory {
+  id: string;
+  msme_address: string;
+  credit_score: number;
+  invoice_id: string;
+  created_at: string;
+}
+
+/**
+ * Save credit score to history when invoice is created
+ */
+export async function saveCreditScoreHistory(
+  msmeAddress: string,
+  creditScore: number,
+  invoiceId: string
+): Promise<void> {
+  try {
+    const { error } = await supabase
+      .from('credit_score_history')
+      .insert({
+        msme_address: msmeAddress.toLowerCase(),
+        credit_score: creditScore,
+        invoice_id: invoiceId,
+      });
+
+    if (error) {
+      console.error('Error saving credit score history:', error);
+      throw error;
+    }
+
+    console.log('✓ Credit score history saved');
+  } catch (error) {
+    console.error('Failed to save credit score history:', error);
+    throw error;
+  }
+}
+
+/**
+ * Get credit score history for an MSME
+ */
+export async function getCreditScoreHistory(
+  msmeAddress: string
+): Promise<CreditScoreHistory[]> {
+  try {
+    const { data, error } = await supabase
+      .from('credit_score_history')
+      .select('*')
+      .eq('msme_address', msmeAddress.toLowerCase())
+      .order('created_at', { ascending: false });
+
+    if (error) {
+      console.error('Error fetching credit score history:', error);
+      throw error;
+    }
+
+    return data || [];
+  } catch (error) {
+    console.error('Failed to fetch credit score history:', error);
+    return [];
+  }
+}
+
+/**
+ * Calculate average credit score from history
+ */
+export async function getAverageCreditScore(
+  msmeAddress: string
+): Promise<number | null> {
+  try {
+    const history = await getCreditScoreHistory(msmeAddress);
+
+    if (history.length === 0) {
+      return null; // No history available
+    }
+
+    const totalScore = history.reduce((sum, entry) => sum + entry.credit_score, 0);
+    const average = Math.round(totalScore / history.length);
+
+    return average;
+  } catch (error) {
+    console.error('Failed to calculate average credit score:', error);
+    return null;
+  }
+}
+
+/**
+ * Get credit score trend (improving/declining/stable)
+ */
+export async function getCreditScoreTrend(
+  msmeAddress: string
+): Promise<'improving' | 'declining' | 'stable' | 'no-data'> {
+  try {
+    const history = await getCreditScoreHistory(msmeAddress);
+
+    if (history.length < 2) {
+      return 'no-data';
+    }
+
+    // Compare last 3 scores vs previous 3 scores
+    const recentScores = history.slice(0, 3);
+    const olderScores = history.slice(3, 6);
+
+    if (olderScores.length === 0) {
+      // Not enough data for trend
+      return 'stable';
+    }
+
+    const recentAvg = recentScores.reduce((sum, s) => sum + s.credit_score, 0) / recentScores.length;
+    const olderAvg = olderScores.reduce((sum, s) => sum + s.credit_score, 0) / olderScores.length;
+
+    const difference = recentAvg - olderAvg;
+
+    if (difference > 10) return 'improving';
+    if (difference < -10) return 'declining';
+    return 'stable';
+  } catch (error) {
+    console.error('Failed to get credit score trend:', error);
+    return 'no-data';
+  }
+}
+
+/**
+ * Enhanced credit score calculation using historical data
+ * Combines current factors (70%) with historical average (30%)
+ */
+export async function calculateEnhancedCreditScore(
+  currentScore: number,
+  msmeAddress: string
+): Promise<number> {
+  try {
+    const historicalAverage = await getAverageCreditScore(msmeAddress);
+
+    // If no history, use current score
+    if (historicalAverage === null) {
+      console.log('No credit history found, using current score:', currentScore);
+      return currentScore;
+    }
+
+    // Weight: 70% current, 30% historical
+    const enhancedScore = Math.round(currentScore * 0.7 + historicalAverage * 0.3);
+
+    console.log(`Enhanced credit score calculation:
+      Current score: ${currentScore}
+      Historical average: ${historicalAverage}
+      Enhanced score: ${enhancedScore} (70% current + 30% historical)`);
+
+    return enhancedScore;
+  } catch (error) {
+    console.error('Failed to calculate enhanced credit score:', error);
+    // Fallback to current score on error
+    return currentScore;
+  }
+}

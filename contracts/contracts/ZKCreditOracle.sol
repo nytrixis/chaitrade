@@ -61,6 +61,25 @@ contract ZKCreditOracle {
     }
 
     /**
+     * @dev Commit credit score on behalf of an MSME (for batch operations)
+     * @param msme The MSME address
+     * @param commitment Merkle root of credit data
+     */
+    function commitCreditScoreFor(address msme, bytes32 commitment) external {
+        require(commitment != bytes32(0), "Invalid commitment");
+        require(msme != address(0), "Invalid MSME address");
+
+        commitments[msme] = CreditCommitment({
+            commitment: commitment,
+            timestamp: block.timestamp,
+            isVerified: false,
+            minScoreProven: 0
+        });
+
+        emit CommitmentSubmitted(msme, commitment);
+    }
+
+    /**
      * @dev Verify ZK proof that committed score > minScore
      * @param proof_a ZK proof component A
      * @param proof_b ZK proof component B
@@ -68,10 +87,10 @@ contract ZKCreditOracle {
      * @param publicInputs Public signals from circuit
      * @param minScore Minimum score to prove (e.g., 700)
      *
-     * Public inputs expected:
-     * [0] = commitment (same as committed earlier)
-     * [1] = minScore
-     * [2] = isValid (1 if score > minScore, 0 otherwise)
+     * Public inputs from circuit (snarkjs format):
+     * [0] = isValid (1 if score > minScore, 0 otherwise) - OUTPUT
+     * [1] = commitment (same as committed earlier) - PUBLIC INPUT
+     * [2] = minThreshold - PUBLIC INPUT
      */
     function verifyScoreProof(
         uint[2] memory proof_a,
@@ -83,19 +102,19 @@ contract ZKCreditOracle {
         CreditCommitment storage commitment = commitments[msg.sender];
         require(commitment.commitment != bytes32(0), "No commitment found");
 
-        // Verify commitment matches
-        require(uint256(commitment.commitment) == publicInputs[0],
+        // Verify commitment matches (index 1 in snarkjs output)
+        require(uint256(commitment.commitment) == publicInputs[1],
                 "Commitment mismatch");
 
-        // Verify minScore matches
-        require(minScore == publicInputs[1], "MinScore mismatch");
+        // Verify minScore matches (index 2 in snarkjs output)
+        require(minScore == publicInputs[2], "MinScore mismatch");
 
         // Verify proof
         bool isValid = verifier.verifyProof(proof_a, proof_b, proof_c, publicInputs);
         require(isValid, "Invalid proof");
 
-        // Proof output should be 1 (score > minScore)
-        require(publicInputs[2] == 1, "Score below threshold");
+        // Proof output should be 1 (index 0 in snarkjs output)
+        require(publicInputs[0] == 1, "Score below threshold");
 
         // Update commitment
         commitment.isVerified = true;
@@ -106,9 +125,53 @@ contract ZKCreditOracle {
     }
 
     /**
+     * @dev Verify ZK proof for a specific MSME (for batch operations)
+     * @param msme The MSME address
+     * @param proof_a ZK proof component A
+     * @param proof_b ZK proof component B
+     * @param proof_c ZK proof component C
+     * @param publicInputs Public signals from circuit (snarkjs format)
+     * @param minScore Minimum score to prove
+     */
+    function verifyScoreProofFor(
+        address msme,
+        uint[2] memory proof_a,
+        uint[2][2] memory proof_b,
+        uint[2] memory proof_c,
+        uint[3] memory publicInputs,
+        uint256 minScore
+    ) external returns (bool) {
+        require(msme != address(0), "Invalid MSME address");
+
+        CreditCommitment storage commitment = commitments[msme];
+        require(commitment.commitment != bytes32(0), "No commitment found");
+
+        // Verify commitment matches (index 1 in snarkjs output)
+        require(uint256(commitment.commitment) == publicInputs[1],
+                "Commitment mismatch");
+
+        // Verify minScore matches (index 2 in snarkjs output)
+        require(minScore == publicInputs[2], "MinScore mismatch");
+
+        // Verify proof
+        bool isValid = verifier.verifyProof(proof_a, proof_b, proof_c, publicInputs);
+        require(isValid, "Invalid proof");
+
+        // Proof output should be 1 (index 0 in snarkjs output)
+        require(publicInputs[0] == 1, "Score below threshold");
+
+        // Update commitment
+        commitment.isVerified = true;
+        commitment.minScoreProven = minScore;
+
+        emit ProofVerified(msme, minScore);
+        return true;
+    }
+
+    /**
      * @dev Check if MSME is creditworthy for given amount
      * @param msme MSME address
-     * @param requestedAmount Amount MSME wants to fund (USDC, 6 decimals)
+     * @param requestedAmount Amount MSME wants to fund
      * @return bool Whether MSME is creditworthy
      * @return uint256 Required minimum score
      */
@@ -119,15 +182,17 @@ contract ZKCreditOracle {
     {
         CreditCommitment memory commitment = commitments[msme];
 
+        // Must have verified ZK proof
         if (!commitment.isVerified) {
             return (false, 0);
         }
 
-        // Determine tier based on amount
+        // Determine tier based on amount (using 18 decimals for AVAX)
+        // Invoice amounts are stored in wei (18 decimals)
         uint256 requiredScore;
-        if (requestedAmount <= 5_000_000 * 10**6) { // ₹5L
+        if (requestedAmount <= 170 * 10**18) { // ~₹5L = ~170 AVAX at ₹3000/AVAX
             requiredScore = TIER_BASIC;
-        } else if (requestedAmount <= 20_000_000 * 10**6) { // ₹20L
+        } else if (requestedAmount <= 670 * 10**18) { // ~₹20L = ~670 AVAX
             requiredScore = TIER_STANDARD;
         } else {
             requiredScore = TIER_PREMIUM;

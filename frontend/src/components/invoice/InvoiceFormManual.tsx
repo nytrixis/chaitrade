@@ -7,6 +7,7 @@ import { uploadToPinata } from "@/lib/pinata/upload";
 import { generateCreditScoreProof, calculateCreditScore } from "@/lib/zk/generateProof";
 import { createInvoice } from "@/lib/supabase/invoices";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
+import { AVAX_TO_INR_RATE } from "@/lib/utils/currency";
 import {
   CONTRACT_ADDRESSES,
   INVOICENFT_ABI,
@@ -85,7 +86,12 @@ export function InvoiceFormManual({ onSuccess }: InvoiceFormManualProps) {
       setCreditScore(score);
 
       const minThreshold = 650; // Minimum credit score for funding
-      const proof = await generateCreditScoreProof(score, minThreshold);
+      const proof = await generateCreditScoreProof(
+        score,
+        minThreshold,
+        '/zk/credit_score_range.wasm',
+        '/zk/credit_score_range_final.zkey'
+      );
       setZkProof(proof);
       console.log('✓ Generated ZK proof, score:', score);
 
@@ -137,8 +143,10 @@ export function InvoiceFormManual({ onSuccess }: InvoiceFormManualProps) {
       // Convert due date to timestamp
       const dueTimestamp = BigInt(Math.floor(new Date(formData.dueDate).getTime() / 1000));
 
-      // Convert amount to wei (assuming INR, using 18 decimals)
-      const amountWei = parseUnits(formData.amount, 18);
+      // Convert INR amount to AVAX (1 AVAX = ₹3000), then to wei
+      const amountInInr = parseFloat(formData.amount);
+      const amountInAvax = amountInInr / AVAX_TO_INR_RATE;
+      const amountWei = parseUnits(amountInAvax.toFixed(18), 18);
 
       writeContract({
         address: CONTRACT_ADDRESSES.InvoiceNFT as `0x${string}`,
@@ -237,6 +245,44 @@ export function InvoiceFormManual({ onSuccess }: InvoiceFormManualProps) {
       })();
     }
   }, [isConfirmed, step, nftTokenId, hash, publicClient, formData, ipfsCID, creditScore, address, onSuccess]);
+
+  // Automatically create funding round after mint success
+  useEffect(() => {
+    if (step === "success" && nftTokenId && !isPending) {
+      const timer = setTimeout(() => {
+        const interestRate = 18; // 18% APR
+        console.log(`Creating funding round for NFT #${nftTokenId}...`);
+
+        writeContract({
+          address: CONTRACT_ADDRESSES.FundingPool as `0x${string}`,
+          abi: FUNDINGPOOL_ABI,
+          functionName: 'createFundingRound',
+          args: [BigInt(nftTokenId), BigInt(interestRate * 100)],
+        });
+
+        // Update database status to 'Listed'
+        (async () => {
+          try {
+            const { getInvoiceByTokenId } = await import("@/lib/supabase/invoices");
+            const { supabase } = await import("@/lib/supabase/client");
+
+            const invoice = await getInvoiceByTokenId(nftTokenId);
+            if (invoice?.id) {
+              await (supabase as any)
+                .from('invoices')
+                .update({ status: 'Listed' })
+                .eq('id', invoice.id);
+              console.log('✓ Invoice status updated to Listed');
+            }
+          } catch (err) {
+            console.error('Failed to update invoice status:', err);
+          }
+        })();
+      }, 1500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [step, nftTokenId, isPending, writeContract]);
 
   return (
     <div className="card space-y-6">

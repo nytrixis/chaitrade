@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import "./globals.css";
 import { Providers } from "./providers";
+import NavDockWrapper from "@/components/NavDockWrapper";
+import { Toaster } from "react-hot-toast";
+import { WalletHeader } from "@/components/layout/WalletHeader";
 
 export const metadata: Metadata = {
   title: "ChaiTrade - Community-Powered MSME Financing",
@@ -23,7 +26,33 @@ export default function RootLayout({
         <meta name="viewport" content="width=device-width, initial-scale=1" />
       </head>
       <body>
-        <Providers>{children}</Providers>
+        <Providers>
+          <WalletHeader />
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              style: {
+                background: '#1a1a1a',
+                color: '#f9fafb',
+                border: '1px solid rgba(61, 139, 104, 0.3)',
+              },
+              success: {
+                iconTheme: {
+                  primary: '#3d8b68',
+                  secondary: '#fff',
+                },
+              },
+              error: {
+                iconTheme: {
+                  primary: '#ef4444',
+                  secondary: '#fff',
+                },
+              },
+            }}
+          />
+          {children}
+          <NavDockWrapper />
+        </Providers>
       </body>
     </html>
   );
