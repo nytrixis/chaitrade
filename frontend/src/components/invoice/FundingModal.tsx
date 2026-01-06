@@ -32,7 +32,10 @@ export function FundingModal({
   // Fetch real-time funding data from blockchain
   const {
     totalFundedInr,
+    totalFundedAvax,
+    targetAmountAvax,
     remainingInr,
+    remainingAvax,
     percentage: fundingProgress,
     refetch
   } = useInvoiceFunding(invoiceId);
@@ -45,7 +48,11 @@ export function FundingModal({
   const actualRemainingAmount = remainingInr || (invoiceAmount - currentlyFunded);
   const actualProgress = fundingProgress || ((currentlyFunded / invoiceAmount) * 100);
 
-  // Validate amount on change
+  // AVAX amounts for validation and calculations
+  const invoiceAmountAvax = targetAmountAvax || inrToAvax(invoiceAmount);
+  const fundedAmountAvax = totalFundedAvax || 0;
+
+  // Validate amount on change (amount is now in AVAX)
   useEffect(() => {
     if (!amount) {
       setValidationError(null);
@@ -53,14 +60,17 @@ export function FundingModal({
     }
 
     const numAmount = parseFloat(amount);
-    const validation = isValidInvestmentAmount(numAmount, invoiceAmount, actualCurrentlyFunded);
+    const remainingAvaxAmount = invoiceAmountAvax - fundedAmountAvax;
+    const validation = isValidInvestmentAmount(numAmount, invoiceAmountAvax, fundedAmountAvax);
 
     if (!validation.valid) {
       setValidationError(validation.error || 'Invalid amount');
+    } else if (numAmount > remainingAvaxAmount) {
+      setValidationError(`Amount exceeds remaining ${remainingAvaxAmount.toFixed(3)} AVAX`);
     } else {
       setValidationError(null);
     }
-  }, [amount, invoiceAmount, actualCurrentlyFunded]);
+  }, [amount, invoiceAmountAvax, fundedAmountAvax]);
 
   // Handle successful investment
   useEffect(() => {
@@ -107,13 +117,15 @@ export function FundingModal({
   };
 
   const setPercentage = (percentage: number) => {
-    const calculatedAmount = (actualRemainingAmount * percentage) / 100;
-    setAmount(calculatedAmount.toFixed(0));
+    // Calculate percentage of remaining AVAX amount
+    const remainingAvax = invoiceAmountAvax - fundedAmountAvax;
+    const calculatedAmount = (remainingAvax * percentage) / 100;
+    setAmount(calculatedAmount.toFixed(3)); // 3 decimal places for AVAX
   };
 
-  // Calculate potential returns using currency utilities
-  const amountInr = parseFloat(amount || "0");
-  const amountAvax = inrToAvax(amountInr);
+  // Calculate potential returns - amount is now in AVAX directly
+  const amountAvax = parseFloat(amount || "0");
+  const amountInr = amountAvax * 3000; // Convert AVAX to INR for display (3000 INR per AVAX)
   const returns = calculateReturns(amountAvax, interestRate, 60);
 
   return (
@@ -190,13 +202,14 @@ export function FundingModal({
             {/* Amount Input */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-light-gray mb-2">
-                Investment Amount (₹)
+                Investment Amount (AVAX)
               </label>
               <input
                 type="number"
+                step="0.001"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
-                placeholder="e.g., 50000"
+                placeholder="e.g., 0.1"
                 className="input"
                 disabled={isPending || isConfirming}
               />
