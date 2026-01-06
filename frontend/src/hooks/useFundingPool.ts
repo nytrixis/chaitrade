@@ -45,7 +45,7 @@ export function useInvest() {
       address: CONTRACT_ADDRESSES.FundingPool as `0x${string}`,
       abi: FUNDINGPOOL_ABI,
       functionName: 'invest',
-      args: [BigInt(invoiceId), amount],
+      args: [BigInt(invoiceId)], // Only pass invoiceId, amount goes in value
       value: amount, // Send AVAX with transaction
     });
   };
