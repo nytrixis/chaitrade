@@ -12,6 +12,7 @@ import { RiskScoreCard } from '@/components/invoice/RiskScoreCard';
 import { ActivityTimeline, Activity } from '@/components/invoice/ActivityTimeline';
 import { SettlementTrigger } from '@/components/invoice/SettlementTrigger';
 import { formatCurrency, formatDate, formatAddress } from '@/lib/utils/format';
+import { avaxToInr } from '@/lib/utils/currency';
 import Link from 'next/link';
 
 interface Investor {
@@ -161,7 +162,7 @@ export default function InvoicePage() {
   // Get funding data from FundingPool contract
   const fundingInfo = fundingData as any;
   const fundedAmountAvax = fundingInfo ? Number(formatUnits(fundingInfo.totalFunded, 18)) : 0;
-  const fundedAmount = fundedAmountAvax; // For now, show AVAX amount (will convert to INR in future)
+  const fundedAmountInr = avaxToInr(fundedAmountAvax); // Convert AVAX to INR for display
   const investorCount = fundingInfo ? Number(fundingInfo.investorCount) : 0;
   const isFullyFunded = fundingInfo ? fundingInfo.isFullyFunded : false;
 
@@ -267,7 +268,7 @@ export default function InvoicePage() {
                 <div className="flex justify-between text-sm mb-2">
                   <span className="text-light-gray">Funded</span>
                   <span className="text-off-white font-semibold">
-                    {formatCurrency(fundedAmount, 0)} / {formatCurrency(invoiceAmount, 0)}
+                    {formatCurrency(fundedAmountInr, 0)} / {formatCurrency(invoiceAmount, 0)}
                   </span>
                 </div>
                 <div className="w-full bg-dark-gray rounded-full h-3">
