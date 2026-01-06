@@ -154,16 +154,18 @@ export default function InvoicePage() {
 
   // Parse on-chain data
   const onChainData = onChainInvoice as any;
-  const invoiceAmount = Number(formatUnits(onChainData.amount, 18));
+  const invoiceAmountAvax = Number(formatUnits(onChainData.amount, 18)); // Amount in AVAX
+  const invoiceAmount = invoice.amount || 0; // Use INR amount from database for display
   const dueDate = new Date(Number(onChainData.dueDate) * 1000);
 
   // Get funding data from FundingPool contract
   const fundingInfo = fundingData as any;
-  const fundedAmount = fundingInfo ? Number(formatUnits(fundingInfo.totalFunded, 18)) : 0;
+  const fundedAmountAvax = fundingInfo ? Number(formatUnits(fundingInfo.totalFunded, 18)) : 0;
+  const fundedAmount = fundedAmountAvax; // For now, show AVAX amount (will convert to INR in future)
   const investorCount = fundingInfo ? Number(fundingInfo.investorCount) : 0;
   const isFullyFunded = fundingInfo ? fundingInfo.isFullyFunded : false;
 
-  const fundingProgress = invoiceAmount > 0 ? (fundedAmount / invoiceAmount) * 100 : 0;
+  const fundingProgress = invoiceAmountAvax > 0 ? (fundedAmountAvax / invoiceAmountAvax) * 100 : 0;
   const buyerName = onChainData.buyerName;
   const status = ['pending', 'active', 'funded', 'settled', 'defaulted'][onChainData.status];
 

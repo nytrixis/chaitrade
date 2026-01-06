@@ -89,8 +89,9 @@ export function isValidInvestmentAmount(
     return { valid: false, error: 'Investment amount must be greater than 0' };
   }
 
-  if (amount < 1000) {
-    return { valid: false, error: 'Minimum investment amount is ₹1,000' };
+  // Minimum investment: 0.001 AVAX for testnet (≈₹3)
+  if (amount < 0.001) {
+    return { valid: false, error: 'Minimum investment amount is 0.001 AVAX' };
   }
 
   const remaining = invoiceAmount - currentlyFunded;
