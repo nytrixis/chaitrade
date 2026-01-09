@@ -284,10 +284,10 @@ export function InvoiceUpload({ onSuccess, onUploadSuccess, onManualEntry }: Inv
       {isConnected && (
         <>
           {loading && (
-            <div className="bg-sage-green-500/10 border border-sage-green-500/30 rounded-lg p-4">
+            <div className="bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-4">
               <div className="flex items-center gap-3 mb-2">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-sage-green-500"></div>
-                <span className="text-sage-green-400 font-semibold">Step {getStepNumber(step)} of 5</span>
+                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-emerald-500"></div>
+                <span className="text-emerald-400 font-semibold">Step {getStepNumber(step)} of 5</span>
               </div>
               <p className="text-light-gray text-sm mb-2">{statusMessage}</p>
               {step === "mint" && (
@@ -299,9 +299,9 @@ export function InvoiceUpload({ onSuccess, onUploadSuccess, onManualEntry }: Inv
           )}
 
           {step === "success" && (
-            <div className="bg-sage-green-500/20 border border-sage-green-500/50 rounded-lg p-6 text-center">
+            <div className="bg-emerald-500/20 border border-emerald-500/50 rounded-lg p-6 text-center">
               <div className="text-4xl mb-3">✅</div>
-              <h4 className="text-xl font-bold text-sage-green-400 mb-2">Invoice Listed Successfully!</h4>
+              <h4 className="text-xl font-bold text-emerald-400 mb-2">Invoice Listed Successfully!</h4>
               <p className="text-light-gray">NFT #{nftTokenId} is now available for funding on the marketplace.</p>
               <p className="text-sm text-light-gray mt-2">Credit Score: {creditScore}</p>
               <button
@@ -314,7 +314,7 @@ export function InvoiceUpload({ onSuccess, onUploadSuccess, onManualEntry }: Inv
           )}
 
           {step === "upload" && !loading && (
-            <div className="border-2 border-dashed border-medium-gray rounded-lg p-8 text-center hover:border-sage-green-500/50 transition-colors">
+            <div className="border-2 border-dashed border-medium-gray rounded-lg p-8 text-center hover:border-emerald-500/50 transition-colors">
               <input
                 type="file"
                 id="invoice-upload"
@@ -346,7 +346,7 @@ export function InvoiceUpload({ onSuccess, onUploadSuccess, onManualEntry }: Inv
             <div className="text-center pt-4 border-t border-medium-gray/30">
               <button
                 onClick={onManualEntry}
-                className="text-sage-green-500 hover:text-sage-green-400 text-sm"
+                className="text-emerald-500 hover:text-emerald-400 text-sm"
               >
                 Or enter invoice details manually →
               </button>

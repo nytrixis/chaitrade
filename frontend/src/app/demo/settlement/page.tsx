@@ -64,7 +64,7 @@ export default function SettlementDemoPage() {
       <div className="container mx-auto px-4 max-w-6xl">
         {/* Header */}
         <div className="mb-8">
-          <Link href="/" className="text-sage-green-500 hover:text-sage-green-400 mb-4 inline-block">
+          <Link href="/" className="text-emerald-500 hover:text-emerald-400 mb-4 inline-block">
             ← Back to Home
           </Link>
           <div>
@@ -104,8 +104,8 @@ export default function SettlementDemoPage() {
                 </div>
 
                 <div className="flex gap-4">
-                  <div className="w-8 h-8 rounded-full bg-sage-green-500/20 flex items-center justify-center flex-shrink-0">
-                    <span className="text-sage-green-400 font-bold">3</span>
+                  <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                    <span className="text-emerald-400 font-bold">3</span>
                   </div>
                   <div>
                     <h3 className="font-semibold text-off-white mb-1">Automatic Transfer</h3>
@@ -147,7 +147,7 @@ export default function SettlementDemoPage() {
                 </div>
                 <div>
                   <div className="text-sm text-light-gray mb-1">Status</div>
-                  <div className="text-sage-green-400 font-semibold">✓ Fully Funded</div>
+                  <div className="text-emerald-400 font-semibold">✓ Fully Funded</div>
                 </div>
                 <div>
                   <div className="text-sm text-light-gray mb-1">Due Date</div>
@@ -169,7 +169,7 @@ export default function SettlementDemoPage() {
                     <div className="text-off-white font-semibold">MSME (80%)</div>
                     <div className="text-xs text-light-gray">Immediate working capital</div>
                   </div>
-                  <div className="text-sage-green-400 font-bold text-xl">
+                  <div className="text-emerald-400 font-bold text-xl">
                     {formatCurrency(distribution.msmeAmount, 0)}
                   </div>
                 </div>
@@ -195,7 +195,7 @@ export default function SettlementDemoPage() {
 
               <div className="mt-4 pt-4 border-t border-medium-gray/20 flex justify-between items-center">
                 <div className="text-off-white font-bold text-lg">Total to Investors</div>
-                <div className="text-sage-green-400 font-bold text-2xl">
+                <div className="text-emerald-400 font-bold text-2xl">
                   {formatCurrency(totalToInvestors, 0)}
                 </div>
               </div>
@@ -224,7 +224,7 @@ export default function SettlementDemoPage() {
                 </div>
                 <div className="w-full bg-dark-gray rounded-full h-3">
                   <div
-                    className="bg-sage-green-500 h-3 rounded-full transition-all duration-1000"
+                    className="bg-emerald-500 h-3 rounded-full transition-all duration-1000"
                     style={{ width: `${progress}%` }}
                   ></div>
                 </div>
@@ -236,11 +236,11 @@ export default function SettlementDemoPage() {
                 <div className="flex gap-4">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 border-2 ${
                     step === 'payment_detected' ? 'border-blue-500 bg-blue-500/20' :
-                    progress > 25 ? 'border-sage-green-500 bg-sage-green-500/20' :
+                    progress > 25 ? 'border-emerald-500 bg-emerald-500/20' :
                     'border-medium-gray bg-medium-gray/20'
                   }`}>
                     {progress > 25 ? (
-                      <span className="text-sage-green-400">✓</span>
+                      <span className="text-emerald-400">✓</span>
                     ) : (
                       <div className="w-4 h-4 border-2 border-blue-400 border-t-transparent rounded-full animate-spin"></div>
                     )}
@@ -248,7 +248,7 @@ export default function SettlementDemoPage() {
                   <div className="flex-1">
                     <div className={`font-semibold ${
                       step === 'payment_detected' ? 'text-blue-400' :
-                      progress > 25 ? 'text-sage-green-400' :
+                      progress > 25 ? 'text-emerald-400' :
                       'text-light-gray'
                     }`}>
                       Payment Detected
@@ -263,11 +263,11 @@ export default function SettlementDemoPage() {
                 <div className="flex gap-4">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 border-2 ${
                     step === 'calculating' ? 'border-purple-500 bg-purple-500/20' :
-                    progress > 50 ? 'border-sage-green-500 bg-sage-green-500/20' :
+                    progress > 50 ? 'border-emerald-500 bg-emerald-500/20' :
                     'border-medium-gray bg-medium-gray/20'
                   }`}>
                     {progress > 50 ? (
-                      <span className="text-sage-green-400">✓</span>
+                      <span className="text-emerald-400">✓</span>
                     ) : step === 'calculating' ? (
                       <div className="w-4 h-4 border-2 border-purple-400 border-t-transparent rounded-full animate-spin"></div>
                     ) : (
@@ -277,7 +277,7 @@ export default function SettlementDemoPage() {
                   <div className="flex-1">
                     <div className={`font-semibold ${
                       step === 'calculating' ? 'text-purple-400' :
-                      progress > 50 ? 'text-sage-green-400' :
+                      progress > 50 ? 'text-emerald-400' :
                       'text-light-gray'
                     }`}>
                       Calculating Distribution
@@ -291,21 +291,21 @@ export default function SettlementDemoPage() {
                 {/* Executing Transfers */}
                 <div className="flex gap-4">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 border-2 ${
-                    step === 'settling' ? 'border-sage-green-500 bg-sage-green-500/20' :
-                    progress === 100 ? 'border-sage-green-500 bg-sage-green-500/20' :
+                    step === 'settling' ? 'border-emerald-500 bg-emerald-500/20' :
+                    progress === 100 ? 'border-emerald-500 bg-emerald-500/20' :
                     'border-medium-gray bg-medium-gray/20'
                   }`}>
                     {progress === 100 ? (
-                      <span className="text-sage-green-400">✓</span>
+                      <span className="text-emerald-400">✓</span>
                     ) : step === 'settling' ? (
-                      <div className="w-4 h-4 border-2 border-sage-green-400 border-t-transparent rounded-full animate-spin"></div>
+                      <div className="w-4 h-4 border-2 border-emerald-400 border-t-transparent rounded-full animate-spin"></div>
                     ) : (
                       <span className="text-light-gray">○</span>
                     )}
                   </div>
                   <div className="flex-1">
                     <div className={`font-semibold ${
-                      step === 'settling' || progress === 100 ? 'text-sage-green-400' :
+                      step === 'settling' || progress === 100 ? 'text-emerald-400' :
                       'text-light-gray'
                     }`}>
                       Executing Transfers
@@ -338,15 +338,15 @@ export default function SettlementDemoPage() {
           <div className="max-w-4xl mx-auto">
             <div className="card text-center mb-6">
               <div className="text-6xl mb-4">✅</div>
-              <h2 className="text-3xl font-bold text-sage-green-400 mb-2">Settlement Complete!</h2>
+              <h2 className="text-3xl font-bold text-emerald-400 mb-2">Settlement Complete!</h2>
               <p className="text-light-gray mb-6">
                 Funds have been distributed automatically via smart contract
               </p>
 
               <div className="grid md:grid-cols-2 gap-4 mb-6">
-                <div className="bg-sage-green-500/10 border border-sage-green-500/20 rounded-lg p-6 text-left">
+                <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-6 text-left">
                   <div className="text-sm text-light-gray mb-2">MSME Received</div>
-                  <div className="text-3xl font-bold text-sage-green-400 mb-3">
+                  <div className="text-3xl font-bold text-emerald-400 mb-3">
                     {formatCurrency(distribution.msmeAmount, 0)}
                   </div>
                   <div className="text-xs text-light-gray">
@@ -370,7 +370,7 @@ export default function SettlementDemoPage() {
                 <div className="space-y-2 text-sm">
                   <div className="flex justify-between">
                     <span className="text-light-gray">Transaction Hash</span>
-                    <span className="font-mono text-sage-green-400 text-xs">0x742d35...95f0bEb</span>
+                    <span className="font-mono text-emerald-400 text-xs">0x742d35...95f0bEb</span>
                   </div>
                   <div className="flex justify-between">
                     <span className="text-light-gray">Block Number</span>
@@ -390,7 +390,7 @@ export default function SettlementDemoPage() {
                   href="https://testnet.snowtrace.io"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sage-green-500 hover:text-sage-green-400 text-sm mt-3 inline-block"
+                  className="text-emerald-500 hover:text-emerald-400 text-sm mt-3 inline-block"
                 >
                   View on Snowtrace →
                 </a>
@@ -428,7 +428,7 @@ export default function SettlementDemoPage() {
                     </div>
                     <div className="bg-charcoal/50 rounded p-2">
                       <div className="text-light-gray mb-1">ChaiTrade</div>
-                      <div className="text-sage-green-400 font-semibold">&lt; 10 seconds</div>
+                      <div className="text-emerald-400 font-semibold">&lt; 10 seconds</div>
                     </div>
                   </div>
                 </div>

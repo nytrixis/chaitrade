@@ -57,13 +57,13 @@ export function ActivityTimeline({ invoiceId, activities = [], className = '' }:
       case 'invoice_created':
         return 'border-blue-500 bg-blue-500/20';
       case 'funding_received':
-        return 'border-sage-green-500 bg-sage-green-500/20';
+        return 'border-emerald-500 bg-emerald-500/20';
       case 'fully_funded':
         return 'border-purple-500 bg-purple-500/20';
       case 'settlement_triggered':
         return 'border-yellow-500 bg-yellow-500/20';
       case 'invoice_settled':
-        return 'border-sage-green-500 bg-sage-green-500/20';
+        return 'border-emerald-500 bg-emerald-500/20';
       case 'default':
         return 'border-red-500 bg-red-500/20';
       default:
@@ -147,7 +147,7 @@ export function ActivityTimeline({ invoiceId, activities = [], className = '' }:
                   href={`https://testnet.snowtrace.io/tx/${activity.tx_hash}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-sage-green-500 hover:text-sage-green-400 mt-2 inline-block"
+                  className="text-xs text-emerald-500 hover:text-emerald-400 mt-2 inline-block"
                 >
                   View transaction →
                 </a>

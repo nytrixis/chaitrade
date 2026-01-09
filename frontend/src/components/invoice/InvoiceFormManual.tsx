@@ -423,8 +423,8 @@ export function InvoiceFormManual({ onSuccess }: InvoiceFormManualProps) {
       {/* Success state */}
       {step === "success" && (
         <div className="space-y-4">
-          <div className="bg-sage-green-500/10 border border-sage-green-500/20 rounded-lg p-4">
-            <p className="text-sage-green-400 font-poppins font-semibold mb-2">
+          <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-4">
+            <p className="text-emerald-400 font-poppins font-semibold mb-2">
               ✓ Invoice Successfully Created
             </p>
             <div className="text-sm space-y-1 text-light-gray">

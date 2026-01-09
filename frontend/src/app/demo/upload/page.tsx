@@ -27,7 +27,7 @@ export default function UploadDemoPage() {
       <div className="container mx-auto px-4 max-w-6xl">
         {/* Header */}
         <div className="mb-8">
-          <Link href="/" className="text-sage-green-500 hover:text-sage-green-400 mb-4 inline-block">
+          <Link href="/" className="text-emerald-500 hover:text-emerald-400 mb-4 inline-block">
             ← Back to Home
           </Link>
           <div className="flex items-center justify-between">
@@ -39,21 +39,21 @@ export default function UploadDemoPage() {
               <div className={`px-3 py-1 rounded-full text-sm ${
                 step === 'intro' ? 'bg-blue-500/20 text-blue-400' :
                 step === 'upload' ? 'bg-blue-500/20 text-blue-400' :
-                'bg-sage-green-500/20 text-sage-green-400'
+                'bg-emerald-500/20 text-emerald-400'
               }`}>
                 1. Upload
               </div>
               <div className="w-8 h-0.5 bg-medium-gray"></div>
               <div className={`px-3 py-1 rounded-full text-sm ${
                 step === 'zk_proof' ? 'bg-blue-500/20 text-blue-400' :
-                step === 'success' ? 'bg-sage-green-500/20 text-sage-green-400' :
+                step === 'success' ? 'bg-emerald-500/20 text-emerald-400' :
                 'bg-medium-gray/20 text-light-gray'
               }`}>
                 2. ZK Proof
               </div>
               <div className="w-8 h-0.5 bg-medium-gray"></div>
               <div className={`px-3 py-1 rounded-full text-sm ${
-                step === 'success' ? 'bg-sage-green-500/20 text-sage-green-400' :
+                step === 'success' ? 'bg-emerald-500/20 text-emerald-400' :
                 'bg-medium-gray/20 text-light-gray'
               }`}>
                 3. Complete
@@ -69,8 +69,8 @@ export default function UploadDemoPage() {
               <h2 className="text-2xl font-bold text-off-white mb-4">How It Works</h2>
               <div className="space-y-4">
                 <div className="flex gap-4">
-                  <div className="w-8 h-8 rounded-full bg-sage-green-500/20 flex items-center justify-center flex-shrink-0">
-                    <span className="text-sage-green-400 font-bold">1</span>
+                  <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                    <span className="text-emerald-400 font-bold">1</span>
                   </div>
                   <div>
                     <h3 className="font-semibold text-off-white mb-1">Upload Your Invoice</h3>
@@ -81,8 +81,8 @@ export default function UploadDemoPage() {
                 </div>
 
                 <div className="flex gap-4">
-                  <div className="w-8 h-8 rounded-full bg-sage-green-500/20 flex items-center justify-center flex-shrink-0">
-                    <span className="text-sage-green-400 font-bold">2</span>
+                  <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                    <span className="text-emerald-400 font-bold">2</span>
                   </div>
                   <div>
                     <h3 className="font-semibold text-off-white mb-1">AI Extracts Data</h3>
@@ -93,8 +93,8 @@ export default function UploadDemoPage() {
                 </div>
 
                 <div className="flex gap-4">
-                  <div className="w-8 h-8 rounded-full bg-sage-green-500/20 flex items-center justify-center flex-shrink-0">
-                    <span className="text-sage-green-400 font-bold">3</span>
+                  <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                    <span className="text-emerald-400 font-bold">3</span>
                   </div>
                   <div>
                     <h3 className="font-semibold text-off-white mb-1">Zero-Knowledge Proof</h3>
@@ -105,8 +105,8 @@ export default function UploadDemoPage() {
                 </div>
 
                 <div className="flex gap-4">
-                  <div className="w-8 h-8 rounded-full bg-sage-green-500/20 flex items-center justify-center flex-shrink-0">
-                    <span className="text-sage-green-400 font-bold">4</span>
+                  <div className="w-8 h-8 rounded-full bg-emerald-500/20 flex items-center justify-center flex-shrink-0">
+                    <span className="text-emerald-400 font-bold">4</span>
                   </div>
                   <div>
                     <h3 className="font-semibold text-off-white mb-1">Mint as NFT</h3>
@@ -135,9 +135,9 @@ export default function UploadDemoPage() {
                 </p>
               </div>
 
-              <div className="card bg-sage-green-500/10 border-sage-green-500/20">
+              <div className="card bg-emerald-500/10 border-emerald-500/20">
                 <div className="text-3xl mb-2">🔒</div>
-                <h3 className="font-semibold text-sage-green-400 mb-1">Privacy Protected</h3>
+                <h3 className="font-semibold text-emerald-400 mb-1">Privacy Protected</h3>
                 <p className="text-sm text-light-gray">
                   ZK proofs keep your business data confidential
                 </p>
@@ -218,14 +218,14 @@ export default function UploadDemoPage() {
                   </div>
                   <div className="flex justify-between py-2">
                     <span className="text-light-gray">Credit Score</span>
-                    <span className="text-sage-green-400 font-semibold">{uploadedInvoice.credit_score}</span>
+                    <span className="text-emerald-400 font-semibold">{uploadedInvoice.credit_score}</span>
                   </div>
                 </div>
 
-                <div className="mt-6 bg-sage-green-500/10 border border-sage-green-500/20 rounded-lg p-3">
+                <div className="mt-6 bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-3">
                   <div className="flex items-center gap-2 mb-2">
-                    <span className="text-sage-green-400">✓</span>
-                    <span className="text-sm font-semibold text-sage-green-400">OCR Extraction Complete</span>
+                    <span className="text-emerald-400">✓</span>
+                    <span className="text-sm font-semibold text-emerald-400">OCR Extraction Complete</span>
                   </div>
                   <p className="text-xs text-light-gray">
                     All invoice fields successfully extracted and validated
@@ -246,7 +246,7 @@ export default function UploadDemoPage() {
           <div className="max-w-4xl mx-auto">
             <div className="card text-center">
               <div className="text-6xl mb-4">🎉</div>
-              <h2 className="text-3xl font-bold text-sage-green-400 mb-2">Upload Complete!</h2>
+              <h2 className="text-3xl font-bold text-emerald-400 mb-2">Upload Complete!</h2>
               <p className="text-light-gray mb-6">
                 Your invoice has been processed and is ready to be minted as an NFT
               </p>
@@ -261,29 +261,29 @@ export default function UploadDemoPage() {
 
                 <div className="bg-dark-gray/50 rounded-lg p-4 text-left">
                   <div className="text-sm text-light-gray mb-2">Credit Score</div>
-                  <div className="text-2xl font-bold text-sage-green-400">
+                  <div className="text-2xl font-bold text-emerald-400">
                     {uploadedInvoice.credit_score}
                   </div>
                 </div>
               </div>
 
-              <div className="bg-sage-green-500/10 border border-sage-green-500/20 rounded-lg p-4 mb-6 text-left">
-                <h3 className="font-semibold text-sage-green-400 mb-3">✓ Processing Complete</h3>
+              <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-4 mb-6 text-left">
+                <h3 className="font-semibold text-emerald-400 mb-3">✓ Processing Complete</h3>
                 <div className="space-y-2 text-sm">
                   <div className="flex items-center gap-2">
-                    <span className="text-sage-green-400">✓</span>
+                    <span className="text-emerald-400">✓</span>
                     <span className="text-light-gray">Invoice data extracted via OCR</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sage-green-400">✓</span>
+                    <span className="text-emerald-400">✓</span>
                     <span className="text-light-gray">Document uploaded to IPFS</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sage-green-400">✓</span>
+                    <span className="text-emerald-400">✓</span>
                     <span className="text-light-gray">Zero-knowledge proof generated</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span className="text-sage-green-400">✓</span>
+                    <span className="text-emerald-400">✓</span>
                     <span className="text-light-gray">Credit score verified privately</span>
                   </div>
                 </div>

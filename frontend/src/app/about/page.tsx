@@ -8,11 +8,11 @@ export default function AboutPage() {
       {/* Header */}
       <div className="bg-gradient-to-b from-dark-gray to-charcoal py-16 px-4">
         <div className="max-w-4xl mx-auto text-center">
-          <div className="mb-4 inline-block px-4 py-2 bg-sage-green-500/10 border border-sage-green-500/30 rounded-full">
-            <p className="text-sage-green-400 text-sm font-semibold">About ChaiTrade</p>
+          <div className="mb-4 inline-block px-4 py-2 bg-emerald-500/10 border border-emerald-500/30 rounded-full">
+            <p className="text-emerald-400 text-sm font-semibold">About ChaiTrade</p>
           </div>
           <h1 className="text-5xl font-bold mb-6">
-            Revolutionizing <span className="text-sage-green-500">MSME Financing</span>
+            Revolutionizing <span className="text-emerald-500">MSME Financing</span>
           </h1>
           <p className="text-xl text-light-gray max-w-2xl mx-auto">
             ChaiTrade is a privacy-preserving invoice financing platform built on Avalanche, 
@@ -39,26 +39,26 @@ export default function AboutPage() {
               </p>
             </div>
             <div className="card bg-dark-gray/50">
-              <h3 className="text-xl font-semibold mb-4 text-sage-green-400">Key Benefits</h3>
+              <h3 className="text-xl font-semibold mb-4 text-emerald-400">Key Benefits</h3>
               <ul className="space-y-3">
                 <li className="flex items-start gap-3">
-                  <span className="text-sage-green-500 mt-1">✓</span>
+                  <span className="text-emerald-500 mt-1">✓</span>
                   <span className="text-light-gray">80% funding within 24-48 hours</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="text-sage-green-500 mt-1">✓</span>
+                  <span className="text-emerald-500 mt-1">✓</span>
                   <span className="text-light-gray">Zero-knowledge privacy for business data</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="text-sage-green-500 mt-1">✓</span>
+                  <span className="text-emerald-500 mt-1">✓</span>
                   <span className="text-light-gray">Transparent, immutable on-chain records</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="text-sage-green-500 mt-1">✓</span>
+                  <span className="text-emerald-500 mt-1">✓</span>
                   <span className="text-light-gray">18-36% APR for investors</span>
                 </li>
                 <li className="flex items-start gap-3">
-                  <span className="text-sage-green-500 mt-1">✓</span>
+                  <span className="text-emerald-500 mt-1">✓</span>
                   <span className="text-light-gray">Low 2-3% platform fees, no hidden costs</span>
                 </li>
               </ul>
@@ -75,31 +75,31 @@ export default function AboutPage() {
           <div className="grid md:grid-cols-2 gap-8">
             {/* For MSMEs */}
             <div className="card">
-              <h3 className="text-xl font-semibold mb-6 text-sage-green-400">For MSMEs</h3>
+              <h3 className="text-xl font-semibold mb-6 text-emerald-400">For MSMEs</h3>
               <ol className="space-y-4">
                 <li className="flex gap-4">
-                  <span className="flex-shrink-0 w-8 h-8 bg-sage-green-500/20 border border-sage-green-500 rounded-full flex items-center justify-center text-sm font-bold text-sage-green-500">1</span>
+                  <span className="flex-shrink-0 w-8 h-8 bg-emerald-500/20 border border-emerald-500 rounded-full flex items-center justify-center text-sm font-bold text-emerald-500">1</span>
                   <div>
                     <h4 className="font-medium">Upload Invoice</h4>
                     <p className="text-sm text-light-gray">Submit your invoice as PDF or image. OCR extracts details automatically.</p>
                   </div>
                 </li>
                 <li className="flex gap-4">
-                  <span className="flex-shrink-0 w-8 h-8 bg-sage-green-500/20 border border-sage-green-500 rounded-full flex items-center justify-center text-sm font-bold text-sage-green-500">2</span>
+                  <span className="flex-shrink-0 w-8 h-8 bg-emerald-500/20 border border-emerald-500 rounded-full flex items-center justify-center text-sm font-bold text-emerald-500">2</span>
                   <div>
                     <h4 className="font-medium">ZK Verification</h4>
                     <p className="text-sm text-light-gray">Generate a zero-knowledge proof of your creditworthiness without exposing data.</p>
                   </div>
                 </li>
                 <li className="flex gap-4">
-                  <span className="flex-shrink-0 w-8 h-8 bg-sage-green-500/20 border border-sage-green-500 rounded-full flex items-center justify-center text-sm font-bold text-sage-green-500">3</span>
+                  <span className="flex-shrink-0 w-8 h-8 bg-emerald-500/20 border border-emerald-500 rounded-full flex items-center justify-center text-sm font-bold text-emerald-500">3</span>
                   <div>
                     <h4 className="font-medium">Receive Funding</h4>
                     <p className="text-sm text-light-gray">Get 80% of invoice value instantly when funding target is reached.</p>
                   </div>
                 </li>
                 <li className="flex gap-4">
-                  <span className="flex-shrink-0 w-8 h-8 bg-sage-green-500/20 border border-sage-green-500 rounded-full flex items-center justify-center text-sm font-bold text-sage-green-500">4</span>
+                  <span className="flex-shrink-0 w-8 h-8 bg-emerald-500/20 border border-emerald-500 rounded-full flex items-center justify-center text-sm font-bold text-emerald-500">4</span>
                   <div>
                     <h4 className="font-medium">Settle Invoice</h4>
                     <p className="text-sm text-light-gray">When buyer pays, settle the invoice and release remaining escrow.</p>
@@ -110,31 +110,31 @@ export default function AboutPage() {
 
             {/* For Investors */}
             <div className="card">
-              <h3 className="text-xl font-semibold mb-6 text-sage-green-400">For Investors</h3>
+              <h3 className="text-xl font-semibold mb-6 text-emerald-400">For Investors</h3>
               <ol className="space-y-4">
                 <li className="flex gap-4">
-                  <span className="flex-shrink-0 w-8 h-8 bg-sage-green-500/20 border border-sage-green-500 rounded-full flex items-center justify-center text-sm font-bold text-sage-green-500">1</span>
+                  <span className="flex-shrink-0 w-8 h-8 bg-emerald-500/20 border border-emerald-500 rounded-full flex items-center justify-center text-sm font-bold text-emerald-500">1</span>
                   <div>
                     <h4 className="font-medium">Browse Invoices</h4>
                     <p className="text-sm text-light-gray">Explore verified invoices with ZK-proven credit scores and risk tiers.</p>
                   </div>
                 </li>
                 <li className="flex gap-4">
-                  <span className="flex-shrink-0 w-8 h-8 bg-sage-green-500/20 border border-sage-green-500 rounded-full flex items-center justify-center text-sm font-bold text-sage-green-500">2</span>
+                  <span className="flex-shrink-0 w-8 h-8 bg-emerald-500/20 border border-emerald-500 rounded-full flex items-center justify-center text-sm font-bold text-emerald-500">2</span>
                   <div>
                     <h4 className="font-medium">Invest AVAX</h4>
                     <p className="text-sm text-light-gray">Fund invoices with any amount. Diversify across multiple opportunities.</p>
                   </div>
                 </li>
                 <li className="flex gap-4">
-                  <span className="flex-shrink-0 w-8 h-8 bg-sage-green-500/20 border border-sage-green-500 rounded-full flex items-center justify-center text-sm font-bold text-sage-green-500">3</span>
+                  <span className="flex-shrink-0 w-8 h-8 bg-emerald-500/20 border border-emerald-500 rounded-full flex items-center justify-center text-sm font-bold text-emerald-500">3</span>
                   <div>
                     <h4 className="font-medium">Track Portfolio</h4>
                     <p className="text-sm text-light-gray">Monitor your investments in real-time with on-chain transparency.</p>
                   </div>
                 </li>
                 <li className="flex gap-4">
-                  <span className="flex-shrink-0 w-8 h-8 bg-sage-green-500/20 border border-sage-green-500 rounded-full flex items-center justify-center text-sm font-bold text-sage-green-500">4</span>
+                  <span className="flex-shrink-0 w-8 h-8 bg-emerald-500/20 border border-emerald-500 rounded-full flex items-center justify-center text-sm font-bold text-emerald-500">4</span>
                   <div>
                     <h4 className="font-medium">Earn Returns</h4>
                     <p className="text-sm text-light-gray">Receive principal + interest when invoice is settled. 18-36% APR typical.</p>

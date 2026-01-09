@@ -217,7 +217,7 @@ export default function BrowsePage() {
                   </span>
                 )}
                 {minCreditScore > 0 && (
-                  <span className="px-3 py-1 bg-sage-green-500/20 text-sage-green-400 rounded-full text-sm">
+                  <span className="px-3 py-1 bg-emerald-500/20 text-emerald-400 rounded-full text-sm">
                     Min Score: {minCreditScore}+
                   </span>
                 )}
@@ -233,7 +233,7 @@ export default function BrowsePage() {
                     setMaxAmount(null);
                     setSearchQuery('');
                   }}
-                  className="text-sm text-sage-green-500 hover:text-sage-green-400"
+                  className="text-sm text-emerald-500 hover:text-emerald-400"
                 >
                   Clear all
                 </button>

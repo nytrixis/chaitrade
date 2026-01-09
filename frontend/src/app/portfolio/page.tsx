@@ -117,7 +117,7 @@ export default function PortfolioPage() {
               transition={{ delay: 0.2 }}
             >
               <h1 className="text-4xl font-bold mb-2">
-                <span className="text-sage-green-500">My</span> Portfolio
+                <span className="text-emerald-500">My</span> Portfolio
               </h1>
               <p className="text-light-gray">
                 Track all your invoices and investments in one place
@@ -136,7 +136,7 @@ export default function PortfolioPage() {
             onClick={() => setActiveTab("msme")}
             className={`px-6 py-3 rounded-lg font-medium transition-all ${
               activeTab === "msme"
-                ? "bg-sage-green-500 text-charcoal shadow-lg shadow-sage-green-500/20"
+                ? "bg-emerald-500 text-charcoal shadow-lg shadow-emerald-500/20"
                 : "bg-dark-gray text-light-gray hover:bg-dark-gray/80"
             }`}
           >
@@ -148,7 +148,7 @@ export default function PortfolioPage() {
             onClick={() => setActiveTab("investor")}
             className={`px-6 py-3 rounded-lg font-medium transition-all ${
               activeTab === "investor"
-                ? "bg-sage-green-500 text-charcoal shadow-lg shadow-sage-green-500/20"
+                ? "bg-emerald-500 text-charcoal shadow-lg shadow-emerald-500/20"
                 : "bg-dark-gray text-light-gray hover:bg-dark-gray/80"
             }`}
           >
@@ -322,7 +322,7 @@ export default function PortfolioPage() {
 
 function StatsCard({ label, value, color, delay, subtitle }: { label: string; value: string | number; color: string; delay: number; subtitle?: string }) {
   const colorClasses: Record<string, string> = {
-    'sage-green': 'text-sage-green-500 from-sage-green-500/10 to-sage-green-500/5',
+    'sage-green': 'text-emerald-500 from-emerald-500/10 to-emerald-500/5',
     'yellow': 'text-yellow-400 from-yellow-500/10 to-yellow-500/5',
     'blue': 'text-blue-400 from-blue-500/10 to-blue-500/5',
     'purple': 'text-purple-400 from-purple-500/10 to-purple-500/5',
@@ -357,7 +357,7 @@ function InvoiceFundingProgress({ invoice, delay }: { invoice: Invoice; delay: n
           initial={{ width: 0 }}
           animate={{ width: `${Math.min(percentage, 100)}%` }}
           transition={{ delay: delay + 0.2, duration: 0.8, ease: "easeOut" }}
-          className="bg-gradient-to-r from-sage-green-500 to-sage-green-400 h-2 rounded-full"
+          className="bg-gradient-to-r from-emerald-500 to-emerald-400 h-2 rounded-full"
         />
       </div>
       <div className="flex justify-between text-xs text-light-gray">
@@ -380,14 +380,14 @@ function InvoiceListItem({ invoice, delay }: { invoice: Invoice; delay: number }
       >
         <div className="flex-1">
           <div className="flex items-center gap-3 mb-2">
-            <span className="text-sm font-mono text-sage-green-400">#{invoice.invoice_nft_id}</span>
+            <span className="text-sm font-mono text-emerald-400">#{invoice.invoice_nft_id}</span>
             <StatusBadge status={invoice.status} />
           </div>
           <h4 className="font-semibold text-off-white">{invoice.buyer_name}</h4>
           <p className="text-sm text-light-gray">Due: {formatDate(invoice.due_date)}</p>
         </div>
         <div className="text-right">
-          <p className="text-2xl font-bold text-sage-green-500">{formatCurrency(invoice.amount)}</p>
+          <p className="text-2xl font-bold text-emerald-500">{formatCurrency(invoice.amount)}</p>
           <p className="text-xs text-light-gray">Invoice Value</p>
         </div>
       </motion.div>
@@ -411,14 +411,14 @@ function InvestmentListItem({ investment, delay }: { investment: Investment; del
     >
       <div className="flex-1">
         <div className="flex items-center gap-3 mb-2">
-          <span className="text-sm font-mono text-sage-green-400">Invoice #{investment.invoice_id}</span>
+          <span className="text-sm font-mono text-emerald-400">Invoice #{investment.invoice_id}</span>
           <StatusBadge status={investment.status || "active"} />
         </div>
         <p className="text-sm text-light-gray">Invested on: {formatDate(investment.timestamp || '')}</p>
         <p className="text-xs text-light-gray mt-1">Interest Rate: {interestRate}% APR</p>
       </div>
       <div className="text-right">
-        <p className="text-2xl font-bold text-sage-green-500">{formatAVAX(investment.amount)}</p>
+        <p className="text-2xl font-bold text-emerald-500">{formatAVAX(investment.amount)}</p>
         <p className="text-xs text-light-gray">≈ {formatCurrency(avaxToInr(investment.amount))}</p>
         <p className="text-xs text-light-gray mt-1">Investment Amount</p>
         <p className="text-sm text-purple-400 mt-1">Expected: {formatAVAX(totalReturn)}</p>
@@ -432,7 +432,7 @@ function StatusBadge({ status }: { status: string }) {
   const styles: Record<string, string> = {
     active: "bg-blue-500/20 text-blue-400",
     pending: "bg-yellow-500/20 text-yellow-400",
-    funded: "bg-sage-green-500/20 text-sage-green-400",
+    funded: "bg-emerald-500/20 text-emerald-400",
     settled: "bg-purple-500/20 text-purple-400",
     defaulted: "bg-red-500/20 text-red-400",
   };

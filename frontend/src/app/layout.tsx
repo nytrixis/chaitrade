@@ -4,6 +4,7 @@ import { Providers } from "./providers";
 import NavDockWrapper from "@/components/NavDockWrapper";
 import { Toaster } from "react-hot-toast";
 import { WalletHeader } from "@/components/layout/WalletHeader";
+import Footer from "@/components/layout/Footer";
 
 export const metadata: Metadata = {
   title: "ChaiTrade - Community-Powered MSME Financing",
@@ -51,6 +52,7 @@ export default function RootLayout({
             }}
           />
           {children}
+          <Footer />
           <NavDockWrapper />
         </Providers>
       </body>

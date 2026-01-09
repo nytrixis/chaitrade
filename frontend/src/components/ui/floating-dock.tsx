@@ -76,9 +76,9 @@ const FloatingDockMobile = ({
       </AnimatePresence>
       <button
         onClick={() => setOpen(!open)}
-        className="flex h-10 w-10 items-center justify-center rounded-full bg-dark-gray border border-sage-green-500/30"
+        className="flex h-10 w-10 items-center justify-center rounded-full bg-dark-gray border border-emerald-500/30"
       >
-        <IconLayoutNavbarCollapse className="h-5 w-5 text-sage-green-400" />
+        <IconLayoutNavbarCollapse className="h-5 w-5 text-emerald-400" />
       </button>
     </div>
   );
@@ -97,7 +97,7 @@ const FloatingDockDesktop = ({
       onMouseMove={(e) => mouseX.set(e.pageX)}
       onMouseLeave={() => mouseX.set(Infinity)}
       className={cn(
-        "mx-auto hidden h-16 items-end gap-4 rounded-2xl bg-dark-gray/90 backdrop-blur-sm border border-sage-green-500/20 px-4 pb-3 md:flex",
+        "mx-auto hidden h-16 items-end gap-4 rounded-2xl bg-dark-gray/90 backdrop-blur-sm border border-emerald-500/20 px-4 pb-3 md:flex",
         className
       )}
     >
@@ -167,7 +167,7 @@ function IconContainer({
         style={{ width, height }}
         onMouseEnter={() => setHovered(true)}
         onMouseLeave={() => setHovered(false)}
-        className="relative flex aspect-square items-center justify-center rounded-full bg-charcoal border border-medium-gray/30 hover:border-sage-green-500/50 transition-colors"
+        className="relative flex aspect-square items-center justify-center rounded-full bg-charcoal border border-medium-gray/30 hover:border-emerald-500/50 transition-colors"
       >
         <AnimatePresence>
           {hovered && (
@@ -175,7 +175,7 @@ function IconContainer({
               initial={{ opacity: 0, y: 10, x: "-50%" }}
               animate={{ opacity: 1, y: 0, x: "-50%" }}
               exit={{ opacity: 0, y: 2, x: "-50%" }}
-              className="absolute -top-8 left-1/2 w-fit rounded-md border border-sage-green-500/30 bg-dark-gray px-2 py-0.5 text-xs whitespace-pre text-sage-green-400"
+              className="absolute -top-8 left-1/2 w-fit rounded-md border border-emerald-500/30 bg-dark-gray px-2 py-0.5 text-xs whitespace-pre text-emerald-400"
             >
               {title}
             </motion.div>

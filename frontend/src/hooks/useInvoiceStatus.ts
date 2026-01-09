@@ -92,7 +92,7 @@ export function getStatusColor(status: InvoiceStatus): string {
     pending: 'bg-yellow-500/20 text-yellow-400',
     active: 'bg-blue-500/20 text-blue-400',
     funding: 'bg-purple-500/20 text-purple-400',
-    funded: 'bg-sage-green-500/20 text-sage-green-400',
+    funded: 'bg-emerald-500/20 text-emerald-400',
     settled: 'bg-green-500/20 text-green-400',
     defaulted: 'bg-red-500/20 text-red-400',
   };

@@ -175,7 +175,7 @@ export function FundingModal({
                 </div>
                 <div>
                   <div className="text-light-gray mb-1">Remaining</div>
-                  <div className="text-sage-green-400 font-semibold">
+                  <div className="text-emerald-400 font-semibold">
                     {formatCurrency(actualRemainingAmount, 0)}
                   </div>
                   <div className="text-xs text-light-gray">
@@ -192,7 +192,7 @@ export function FundingModal({
                 </div>
                 <div className="w-full bg-charcoal rounded-full h-2">
                   <div
-                    className="bg-sage-green-500 h-2 rounded-full transition-all duration-500"
+                    className="bg-emerald-500 h-2 rounded-full transition-all duration-500"
                     style={{ width: `${actualProgress}%` }}
                   ></div>
                 </div>
@@ -252,8 +252,8 @@ export function FundingModal({
 
             {/* Estimated Returns */}
             {amount && !validationError && (
-              <div className="bg-sage-green-500/10 border border-sage-green-500/20 rounded-lg p-4 mb-6">
-                <h3 className="text-sm font-semibold text-sage-green-400 mb-3">
+              <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-4 mb-6">
+                <h3 className="text-sm font-semibold text-emerald-400 mb-3">
                   Estimated Returns (60 days)
                 </h3>
                 <div className="space-y-2 text-sm">
@@ -271,7 +271,7 @@ export function FundingModal({
                   <div className="flex justify-between">
                     <span className="text-light-gray">Interest ({interestRate}% APR)</span>
                     <div className="text-right">
-                      <div className="text-sage-green-400 font-semibold">
+                      <div className="text-emerald-400 font-semibold">
                         {formatINR(returns.interestINR)}
                       </div>
                       <div className="text-xs text-light-gray">
@@ -279,10 +279,10 @@ export function FundingModal({
                       </div>
                     </div>
                   </div>
-                  <div className="flex justify-between pt-2 border-t border-sage-green-500/20">
+                  <div className="flex justify-between pt-2 border-t border-emerald-500/20">
                     <span className="text-off-white font-semibold">Total Return</span>
                     <div className="text-right">
-                      <div className="text-sage-green-400 font-bold text-lg">
+                      <div className="text-emerald-400 font-bold text-lg">
                         {formatINR(returns.totalINR)}
                       </div>
                       <div className="text-xs text-light-gray">
@@ -342,18 +342,18 @@ export function FundingModal({
           /* Success State */
           <div className="text-center py-8">
             <div className="text-6xl mb-4">✅</div>
-            <h3 className="text-2xl font-bold text-sage-green-400 mb-2">
+            <h3 className="text-2xl font-bold text-emerald-400 mb-2">
               Investment Successful!
             </h3>
             <p className="text-light-gray mb-4">
               You have successfully invested {formatCurrency(amountInr, 0)} ({formatAVAX(amountAvax)}) in this invoice.
             </p>
-            <div className="bg-sage-green-500/10 border border-sage-green-500/20 rounded-lg p-4 mb-6">
+            <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-4 mb-6">
               <div className="text-sm space-y-2">
                 <div className="flex justify-between">
                   <span className="text-light-gray">Expected Interest</span>
                   <div className="text-right">
-                    <div className="text-sage-green-400 font-semibold">
+                    <div className="text-emerald-400 font-semibold">
                       {formatINR(returns.interestINR)}
                     </div>
                     <div className="text-xs text-light-gray">
@@ -361,10 +361,10 @@ export function FundingModal({
                     </div>
                   </div>
                 </div>
-                <div className="flex justify-between pt-2 border-t border-sage-green-500/20">
+                <div className="flex justify-between pt-2 border-t border-emerald-500/20">
                   <span className="text-light-gray">Total Payout</span>
                   <div className="text-right">
-                    <div className="text-sage-green-400 font-bold">
+                    <div className="text-emerald-400 font-bold">
                       {formatINR(returns.totalINR)}
                     </div>
                     <div className="text-xs text-light-gray">

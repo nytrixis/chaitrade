@@ -117,7 +117,7 @@ export function InvestmentForm({
   const returns = calculateReturns(avaxAmount, interestRate, 60); // 60 days default
 
   return (
-    <form onSubmit={handleInvest} className="card space-y-5 border-sage-green-500/20">
+    <form onSubmit={handleInvest} className="card space-y-5 border-emerald-500/20">
       <div>
         <h3 className="text-xl font-bold mb-2 text-off-white">Make Investment</h3>
         <p className="text-xs text-light-gray mb-4">
@@ -143,8 +143,8 @@ export function InvestmentForm({
       </div>
 
       {amount && avaxAmount > 0 && (
-        <div className="bg-sage-green-500/10 border border-sage-green-500/20 rounded-lg p-4">
-          <p className="text-base font-bold text-sage-green-400 mb-3">
+        <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-4">
+          <p className="text-base font-bold text-emerald-400 mb-3">
             💰 Estimated Returns (60 days)
           </p>
           <div className="text-sm text-light-gray space-y-2">
@@ -157,14 +157,14 @@ export function InvestmentForm({
             </div>
             <div className="flex justify-between">
               <span>Interest ({interestRate}% APR):</span>
-              <span className="text-sage-green-400 font-semibold">{formatAVAX(returns.interest)}</span>
+              <span className="text-emerald-400 font-semibold">{formatAVAX(returns.interest)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-xs text-light-gray">({formatINR(returns.interestINR)})</span>
             </div>
-            <div className="flex justify-between pt-2 border-t border-sage-green-500/20">
+            <div className="flex justify-between pt-2 border-t border-emerald-500/20">
               <span>Total Return:</span>
-              <span className="text-sage-green-400 font-bold">{formatAVAX(returns.total)}</span>
+              <span className="text-emerald-400 font-bold">{formatAVAX(returns.total)}</span>
             </div>
             <div className="flex justify-between">
               <span className="text-xs text-light-gray">({formatINR(returns.totalINR)})</span>

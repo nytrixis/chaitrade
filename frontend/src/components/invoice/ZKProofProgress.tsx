@@ -121,8 +121,8 @@ export function ZKProofProgress({
     switch (status) {
       case 'completed':
         return (
-          <div className="w-8 h-8 rounded-full bg-sage-green-500/20 border-2 border-sage-green-500 flex items-center justify-center">
-            <span className="text-sage-green-400">✓</span>
+          <div className="w-8 h-8 rounded-full bg-emerald-500/20 border-2 border-emerald-500 flex items-center justify-center">
+            <span className="text-emerald-400">✓</span>
           </div>
         );
       case 'in_progress':
@@ -163,8 +163,8 @@ export function ZKProofProgress({
         )}
         {overallStatus === 'completed' && (
           <div className="flex items-center gap-2">
-            <span className="text-sage-green-400 text-xl">✓</span>
-            <span className="text-sm text-sage-green-400">Complete</span>
+            <span className="text-emerald-400 text-xl">✓</span>
+            <span className="text-sm text-emerald-400">Complete</span>
           </div>
         )}
         {overallStatus === 'failed' && (
@@ -185,7 +185,7 @@ export function ZKProofProgress({
           <div
             className={`h-2 rounded-full transition-all duration-500 ${
               overallStatus === 'failed' ? 'bg-red-500' :
-              overallStatus === 'completed' ? 'bg-sage-green-500' :
+              overallStatus === 'completed' ? 'bg-emerald-500' :
               'bg-blue-500'
             }`}
             style={{ width: `${getOverallProgress()}%` }}
@@ -202,7 +202,7 @@ export function ZKProofProgress({
               {getStepIcon(step.status)}
               {index < steps.length - 1 && (
                 <div className={`w-0.5 h-full min-h-[40px] mt-2 ${
-                  step.status === 'completed' ? 'bg-sage-green-500/50' : 'bg-medium-gray/30'
+                  step.status === 'completed' ? 'bg-emerald-500/50' : 'bg-medium-gray/30'
                 }`}></div>
               )}
             </div>
@@ -211,7 +211,7 @@ export function ZKProofProgress({
             <div className="flex-1 pb-4">
               <div className="flex items-center justify-between mb-1">
                 <div className={`font-semibold ${
-                  step.status === 'completed' ? 'text-sage-green-400' :
+                  step.status === 'completed' ? 'text-emerald-400' :
                   step.status === 'in_progress' ? 'text-blue-400' :
                   step.status === 'failed' ? 'text-red-400' :
                   'text-light-gray'
@@ -240,11 +240,11 @@ export function ZKProofProgress({
 
       {/* Success state */}
       {overallStatus === 'completed' && proofCid && (
-        <div className="mt-6 bg-sage-green-500/10 border border-sage-green-500/20 rounded-lg p-4">
+        <div className="mt-6 bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-4">
           <div className="flex items-start gap-3">
             <span className="text-2xl">🔒</span>
             <div className="flex-1">
-              <h4 className="text-sage-green-400 font-semibold mb-2">Proof Generated Successfully</h4>
+              <h4 className="text-emerald-400 font-semibold mb-2">Proof Generated Successfully</h4>
               <div className="text-sm text-light-gray mb-2">
                 Your credit score has been verified using zero-knowledge proofs to protect your privacy.
               </div>
@@ -263,7 +263,7 @@ export function ZKProofProgress({
                 </div>
                 <div>
                   <div className="text-light-gray text-xs mb-1">Privacy</div>
-                  <div className="text-sage-green-400 font-semibold">Protected</div>
+                  <div className="text-emerald-400 font-semibold">Protected</div>
                 </div>
               </div>
             </div>
@@ -312,8 +312,8 @@ export function ZKProofProgressCompact({ status = 'completed' }: { status?: 'idl
       )}
       {status === 'completed' && (
         <>
-          <span className="text-sage-green-400">✓</span>
-          <span className="text-xs text-sage-green-400">ZK Verified</span>
+          <span className="text-emerald-400">✓</span>
+          <span className="text-xs text-emerald-400">ZK Verified</span>
         </>
       )}
       {status === 'failed' && (

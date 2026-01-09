@@ -74,11 +74,11 @@ export function SettlementTrigger({
   // Already settled state
   if (settled || isConfirmed) {
     return (
-      <div className="card bg-sage-green-500/10 border-sage-green-500/30">
+      <div className="card bg-emerald-500/10 border-emerald-500/30">
         <div className="flex items-start gap-4">
           <div className="text-4xl">✅</div>
           <div className="flex-1">
-            <h3 className="text-xl font-bold text-sage-green-400 mb-2">
+            <h3 className="text-xl font-bold text-emerald-400 mb-2">
               Settlement Complete
             </h3>
             <p className="text-sm text-light-gray mb-4">
@@ -89,7 +89,7 @@ export function SettlementTrigger({
               <div className="space-y-2 text-sm">
                 <div className="flex items-center justify-between p-3 bg-dark-gray/50 rounded-lg">
                   <span className="text-light-gray">MSME Received</span>
-                  <span className="text-sage-green-400 font-semibold">
+                  <span className="text-emerald-400 font-semibold">
                     {formatCurrency(distribution.msmeAmount, 0)}
                   </span>
                 </div>
@@ -109,12 +109,12 @@ export function SettlementTrigger({
             )}
 
             {hash && (
-              <div className="mt-4 pt-4 border-t border-sage-green-500/20">
+              <div className="mt-4 pt-4 border-t border-emerald-500/20">
                 <a
                   href={`https://testnet.snowtrace.io/tx/${hash}`}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-sage-green-500 hover:text-sage-green-400 font-mono"
+                  className="text-xs text-emerald-500 hover:text-emerald-400 font-mono"
                 >
                   View transaction on Snowtrace →
                 </a>
@@ -147,7 +147,7 @@ export function SettlementTrigger({
 
   // Ready for settlement
   return (
-    <div className="card border-2 border-sage-green-500/30">
+    <div className="card border-2 border-emerald-500/30">
       <div className="mb-6">
         <div className="flex items-start gap-4 mb-4">
           <div className="text-4xl">⚡</div>
@@ -191,7 +191,7 @@ export function SettlementTrigger({
             </div>
             <div className="flex items-center justify-between">
               <span className="text-light-gray">+ Interest (~18% APR)</span>
-              <span className="text-sage-green-400 font-semibold">
+              <span className="text-emerald-400 font-semibold">
                 {formatCurrency((invoiceAmount * 0.2 * 0.18 * 60) / 365, 0)}
               </span>
             </div>

@@ -177,7 +177,7 @@ export default function InvoicePage() {
   // Status color mapping
   const getStatusColor = (status: string) => {
     switch (status) {
-      case 'funded': return 'bg-sage-green-500/20 text-sage-green-400';
+      case 'funded': return 'bg-emerald-500/20 text-emerald-400';
       case 'active': return 'bg-blue-500/20 text-blue-400';
       case 'settled': return 'bg-purple-500/20 text-purple-400';
       case 'defaulted': return 'bg-red-500/20 text-red-400';
@@ -191,12 +191,12 @@ export default function InvoicePage() {
         {/* Header */}
         <div className="mb-6 flex items-center justify-between">
           <div>
-            <Link href="/browse" className="text-sage-green-500 hover:text-sage-green-400 mb-2 inline-block">
+            <Link href="/browse" className="text-emerald-500 hover:text-emerald-400 mb-2 inline-block">
               ← Back to Marketplace
             </Link>
             <h1 className="text-3xl font-bold text-off-white">Invoice NFT #{id}</h1>
             {isOwner && (
-              <p className="text-sm text-sage-green-400 mt-1">👤 You own this invoice</p>
+              <p className="text-sm text-emerald-400 mt-1">👤 You own this invoice</p>
             )}
           </div>
           <div className="text-right">
@@ -223,7 +223,7 @@ export default function InvoicePage() {
                   <div className={`text-sm ${
                     daysUntilDue < 0 ? 'text-red-400' :
                     daysUntilDue < 7 ? 'text-yellow-400' :
-                    'text-sage-green-400'
+                    'text-emerald-400'
                   }`}>
                     {daysUntilDue < 0
                       ? `${Math.abs(daysUntilDue)} days overdue`
@@ -273,7 +273,7 @@ export default function InvoicePage() {
                 </div>
                 <div className="w-full bg-dark-gray rounded-full h-3">
                   <div
-                    className="bg-sage-green-500 h-3 rounded-full transition-all duration-500"
+                    className="bg-emerald-500 h-3 rounded-full transition-all duration-500"
                     style={{ width: `${Math.min(fundingProgress, 100)}%` }}
                   ></div>
                 </div>
@@ -298,8 +298,8 @@ export default function InvoicePage() {
               )}
 
               {isFullyFunded && (
-                <div className="bg-sage-green-500/10 border border-sage-green-500/20 rounded-lg p-4 text-center">
-                  <p className="text-sage-green-400 font-semibold">✓ Fully Funded</p>
+                <div className="bg-emerald-500/10 border border-emerald-500/20 rounded-lg p-4 text-center">
+                  <p className="text-emerald-400 font-semibold">✓ Fully Funded</p>
                   <p className="text-sm text-light-gray mt-1">This invoice has reached its funding goal</p>
                 </div>
               )}
@@ -328,7 +328,7 @@ export default function InvoicePage() {
                       </div>
                       <div className="text-right">
                         <div className="text-light-gray text-sm mb-1">Contributors</div>
-                        <div className="text-sage-green-400 text-xl font-bold">
+                        <div className="text-emerald-400 text-xl font-bold">
                           {investorCount}
                         </div>
                       </div>
@@ -352,7 +352,7 @@ export default function InvoicePage() {
                               <div className="text-off-white font-semibold">
                                 {formatCurrency(investor.amount, 0)}
                               </div>
-                              <div className="text-xs text-sage-green-400">
+                              <div className="text-xs text-emerald-400">
                                 {investor.percentage.toFixed(1)}%
                               </div>
                             </div>
@@ -413,7 +413,7 @@ export default function InvoicePage() {
                       href={`https://gateway.pinata.cloud/ipfs/${invoice.ipfs_cid}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-sage-green-500 hover:text-sage-green-400 text-xs break-all inline-flex items-center gap-1"
+                      className="text-emerald-500 hover:text-emerald-400 text-xs break-all inline-flex items-center gap-1"
                     >
                       <span>View Invoice</span>
                       <span>→</span>
@@ -434,7 +434,7 @@ export default function InvoicePage() {
                     href={`https://testnet.snowtrace.io/address/${CONTRACT_ADDRESSES.InvoiceNFT}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sage-green-500 hover:text-sage-green-400 font-mono text-xs break-all"
+                    className="text-emerald-500 hover:text-emerald-400 font-mono text-xs break-all"
                   >
                     {formatAddress(CONTRACT_ADDRESSES.InvoiceNFT)}
                   </a>
@@ -446,7 +446,7 @@ export default function InvoicePage() {
                     href={`https://testnet.snowtrace.io/address/${CONTRACT_ADDRESSES.FundingPool}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-sage-green-500 hover:text-sage-green-400 font-mono text-xs break-all"
+                    className="text-emerald-500 hover:text-emerald-400 font-mono text-xs break-all"
                   >
                     {formatAddress(CONTRACT_ADDRESSES.FundingPool)}
                   </a>
@@ -459,7 +459,7 @@ export default function InvoicePage() {
               <div className="card">
                 <h3 className="text-xl font-bold text-off-white mb-4">ZK Verification</h3>
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 rounded-full bg-sage-green-500/20 flex items-center justify-center">
+                  <div className="w-10 h-10 rounded-full bg-emerald-500/20 flex items-center justify-center">
                     <span className="text-xl">✓</span>
                   </div>
                   <div>

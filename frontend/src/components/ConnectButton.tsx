@@ -80,7 +80,7 @@ export function ConnectButton() {
                   <button
                     onClick={openAccountModal}
                     type="button"
-                    className="bg-dark-gray hover:bg-dark-gray/70 px-4 py-2 rounded-lg text-sage-green-400 font-mono text-sm transition-colors"
+                    className="bg-dark-gray hover:bg-dark-gray/70 px-4 py-2 rounded-lg text-emerald-400 font-mono text-sm transition-colors"
                   >
                     {account.displayName}
                   </button>

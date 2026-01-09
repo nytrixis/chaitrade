@@ -50,7 +50,7 @@ export function InvoiceCard({
 
   // Calculate risk indicator
   const getRiskColor = (score: number) => {
-    if (score >= 750) return 'text-sage-green-400';
+    if (score >= 750) return 'text-emerald-400';
     if (score >= 700) return 'text-blue-400';
     if (score >= 650) return 'text-yellow-400';
     return 'text-red-400';
@@ -61,7 +61,7 @@ export function InvoiceCard({
       href={`/invoice/${invoice.invoice_nft_id}`}
       className={`block ${className}`}
     >
-      <div className="card hover:border-sage-green-500/50 transition-all duration-200 hover:shadow-lg hover:shadow-sage-green-500/10">
+      <div className="card hover:border-emerald-500/50 transition-all duration-200 hover:shadow-lg hover:shadow-emerald-500/10">
         {/* Header */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex-1">
@@ -104,7 +104,7 @@ export function InvoiceCard({
           <div className={`text-xs mt-1 ${
             isOverdue ? 'text-red-400' :
             isUrgent ? 'text-yellow-400' :
-            'text-sage-green-400'
+            'text-emerald-400'
           }`}>
             {daysUntilDue > 0 ? `${daysUntilDue} days remaining` : isOverdue ? 'Overdue' : 'Due today'}
           </div>
@@ -121,13 +121,13 @@ export function InvoiceCard({
             </div>
             <div className="flex items-center justify-between text-sm mb-2">
               <span className="text-light-gray">Raised</span>
-              <span className="text-sage-green-400 font-semibold">
+              <span className="text-emerald-400 font-semibold">
                 ₹{displayRaisedAmount.toLocaleString('en-IN')} ({actualProgress.toFixed(0)}%)
               </span>
             </div>
             <div className="w-full bg-dark-gray rounded-full h-2">
               <div
-                className="bg-sage-green-500 h-2 rounded-full transition-all duration-500"
+                className="bg-emerald-500 h-2 rounded-full transition-all duration-500"
                 style={{ width: `${Math.min(actualProgress, 100)}%` }}
               ></div>
             </div>
@@ -152,7 +152,7 @@ export function InvoiceCard({
           <div className="pt-3 border-t border-medium-gray/30 mt-3">
             <div className="flex items-center gap-2 text-xs">
               <span className="text-light-gray">📄 Invoice Document</span>
-              <span className="text-sage-green-500 hover:text-sage-green-400">
+              <span className="text-emerald-500 hover:text-emerald-400">
                 View on IPFS →
               </span>
             </div>

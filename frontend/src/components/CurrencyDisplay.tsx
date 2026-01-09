@@ -33,7 +33,7 @@ export function CurrencyDisplay({
           {formatINR(inrAmount)}
         </span>
         <span className="text-xs text-light-gray">=</span>
-        <span className={emphasize === 'avax' ? 'text-lg font-bold text-sage-green-400' : 'text-sm text-light-gray'}>
+        <span className={emphasize === 'avax' ? 'text-lg font-bold text-emerald-400' : 'text-sm text-light-gray'}>
           {formatAVAX(avaxAmount)}
         </span>
       </div>
@@ -48,9 +48,9 @@ export function CurrencyDisplay({
         <span className="text-lg font-bold">{formatINR(inrAmount)}</span>
       </div>
 
-      <div className="flex items-center justify-between p-2 bg-dark-gray/30 rounded-lg border border-sage-green-500/20">
-        <span className="text-sm text-sage-green-400">Blockchain Amount</span>
-        <span className="text-lg font-bold text-sage-green-400">{formatAVAX(avaxAmount)}</span>
+      <div className="flex items-center justify-between p-2 bg-dark-gray/30 rounded-lg border border-emerald-500/20">
+        <span className="text-sm text-emerald-400">Blockchain Amount</span>
+        <span className="text-lg font-bold text-emerald-400">{formatAVAX(avaxAmount)}</span>
       </div>
 
       <p className="text-xs text-light-gray">
@@ -74,7 +74,7 @@ export function FundingTargetDisplay({
     <div className={`space-y-1 ${className}`}>
       <div className="flex items-center justify-between">
         <span className="text-sm text-light-gray">Funding Target (80%)</span>
-        <span className="text-base font-semibold text-sage-green-400">
+        <span className="text-base font-semibold text-emerald-400">
           {formatAVAX(targetAvax)}
         </span>
       </div>
@@ -90,7 +90,7 @@ export function FundingTargetDisplay({
  */
 export function ExchangeRateBanner({ className = '' }: { className?: string }) {
   return (
-    <div className={`bg-dark-gray/50 border border-sage-green-500/20 rounded-lg p-3 ${className}`}>
+    <div className={`bg-dark-gray/50 border border-emerald-500/20 rounded-lg p-3 ${className}`}>
       <div className="flex items-center gap-2">
         <span className="text-xl">💱</span>
         <div className="flex-1">
@@ -121,7 +121,7 @@ export function CryptoAmount({
   const avaxAmount = inrToAvax(inrAmount);
 
   return (
-    <span className={`font-mono font-bold text-sage-green-400 ${className}`}>
+    <span className={`font-mono font-bold text-emerald-400 ${className}`}>
       {prefix}{formatAVAX(avaxAmount)}
     </span>
   );
@@ -141,7 +141,7 @@ export function AvaxToInrDisplay({
 
   return (
     <div className={`flex items-center gap-2 ${className}`}>
-      <span className="text-lg font-bold text-sage-green-400">{formatAVAX(avaxAmount)}</span>
+      <span className="text-lg font-bold text-emerald-400">{formatAVAX(avaxAmount)}</span>
       <span className="text-xs text-light-gray">=</span>
       <span className="text-sm text-off-white">{formatINR(inrAmount)}</span>
     </div>

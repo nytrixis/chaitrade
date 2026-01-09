@@ -42,7 +42,7 @@ export function RiskScoreCard({ invoice, className = '' }: RiskScoreCardProps) {
     }
   };
 
-  const riskColor = mappedRiskData.category === 'low' ? 'text-sage-green-400' :
+  const riskColor = mappedRiskData.category === 'low' ? 'text-emerald-400' :
                    mappedRiskData.category === 'medium' ? 'text-blue-400' :
                    mappedRiskData.category === 'high' ? 'text-yellow-400' : 'text-red-400';
 
@@ -52,7 +52,7 @@ export function RiskScoreCard({ invoice, className = '' }: RiskScoreCardProps) {
 
   const recommendationBadge = mappedRiskData.recommendation === 'recommended' ? {
     text: '✅ Recommended Investment',
-    className: 'bg-sage-green-500/20 text-sage-green-400 border-sage-green-500/30'
+    className: 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30'
   } : mappedRiskData.recommendation === 'caution' ? {
     text: '⚠️ Invest with Caution',
     className: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30'
@@ -81,7 +81,7 @@ export function RiskScoreCard({ invoice, className = '' }: RiskScoreCardProps) {
               className={`w-2 h-10 rounded transition-all duration-300 ${
                 i < Math.floor(mappedRiskData.score)
                   ? mappedRiskData.category === 'low'
-                    ? 'bg-sage-green-500'
+                    ? 'bg-emerald-500'
                     : mappedRiskData.category === 'medium'
                     ? 'bg-blue-500'
                     : mappedRiskData.category === 'high'
@@ -132,7 +132,7 @@ export function RiskScoreCard({ invoice, className = '' }: RiskScoreCardProps) {
             <div className="flex items-center gap-2">
               <div className="w-24 bg-medium-gray/30 rounded-full h-1.5">
                 <div
-                  className="bg-sage-green-500 h-1.5 rounded-full transition-all"
+                  className="bg-emerald-500 h-1.5 rounded-full transition-all"
                   style={{ width: `${Math.min(100, (mappedRiskData.factors.amountRisk / 2) * 100)}%` }}
                 />
               </div>

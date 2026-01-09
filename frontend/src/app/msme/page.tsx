@@ -23,7 +23,7 @@ export default function MSMEDashboard() {
       <div className="min-h-screen bg-charcoal flex items-center justify-center">
         <div className="text-center">
           <h1 className="text-4xl font-bold mb-4 text-off-white">
-            <span className="text-sage-green-500">ChaiTrade</span> MSME Dashboard
+            <span className="text-emerald-500">ChaiTrade</span> MSME Dashboard
           </h1>
           <p className="text-light-gray mb-8">
             Connect your wallet to access your invoice funding dashboard
@@ -40,11 +40,11 @@ export default function MSMEDashboard() {
         {/* Header */}
         <div className="mb-12">
           <h1 className="text-4xl sm:text-5xl font-bold mb-3">
-            <span className="text-sage-green-500">ChaiTrade</span> MSME Dashboard
+            <span className="text-emerald-500">ChaiTrade</span> MSME Dashboard
           </h1>
           <div className="flex items-center gap-2">
             <span className="text-light-gray">Connected:</span>
-            <code className="bg-dark-gray px-3 py-1 rounded-lg text-sage-green-400 font-mono text-sm">
+            <code className="bg-dark-gray px-3 py-1 rounded-lg text-emerald-400 font-mono text-sm">
               {address?.substring(0, 6)}...{address?.substring(address.length - 4)}
             </code>
           </div>
@@ -56,7 +56,7 @@ export default function MSMEDashboard() {
             onClick={() => setActiveTab("upload")}
             className={`px-6 py-3 rounded-t-lg font-semibold transition-all ${
               activeTab === "upload"
-                ? "bg-sage-green-500 text-charcoal shadow-lg"
+                ? "bg-emerald-500 text-charcoal shadow-lg"
                 : "bg-dark-gray text-light-gray hover:text-off-white hover:bg-dark-gray/70"
             }`}
           >
@@ -66,7 +66,7 @@ export default function MSMEDashboard() {
             onClick={() => setActiveTab("manual")}
             className={`px-6 py-3 rounded-t-lg font-semibold transition-all ${
               activeTab === "manual"
-                ? "bg-sage-green-500 text-charcoal shadow-lg"
+                ? "bg-emerald-500 text-charcoal shadow-lg"
                 : "bg-dark-gray text-light-gray hover:text-off-white hover:bg-dark-gray/70"
             }`}
           >
@@ -104,7 +104,7 @@ export default function MSMEDashboard() {
           <p className="text-light-gray text-sm mb-4">View your invoices and investments in your portfolio:</p>
           <a 
             href="/portfolio" 
-            className="inline-flex items-center gap-2 text-sage-green-400 hover:text-sage-green-300 transition-colors"
+            className="inline-flex items-center gap-2 text-emerald-400 hover:text-sage-green-300 transition-colors"
           >
             Go to Portfolio →
           </a>

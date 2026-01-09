@@ -41,7 +41,7 @@ export function EnhancedInvoiceCard({ invoice, index = 0 }: EnhancedInvoiceCardP
     switch (status) {
       case 'active':
       case 'funding':
-        return 'bg-blue-500/10 text-blue-400 border-blue-500/20';
+        return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
       case 'funded':
         return 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20';
       case 'settled':
@@ -64,12 +64,16 @@ export function EnhancedInvoiceCard({ invoice, index = 0 }: EnhancedInvoiceCardP
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4, delay: index * 0.05 }}
-      className="group relative"
+      whileHover={{ y: -8, scale: 1.02 }}
+      className="group relative h-full"
     >
       {/* Card */}
-      <div className="relative h-full backdrop-blur-sm bg-white/[0.03] border border-white/[0.08] rounded-2xl p-5 hover:border-white/[0.12] transition-all duration-500 hover:bg-white/[0.05]">
+      <div className="relative h-full backdrop-blur-sm bg-dark-gray/60 border-2 border-emerald-500/20 rounded-2xl p-5 hover:border-emerald-500/40 transition-all duration-500 hover:shadow-2xl hover:shadow-emerald-500/20">
         {/* Subtle glow on hover */}
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/0 via-purple-500/0 to-blue-500/0 group-hover:from-blue-500/5 group-hover:via-purple-500/5 group-hover:to-blue-500/5 rounded-2xl transition-all duration-700 opacity-0 group-hover:opacity-100 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 via-emerald-500/0 to-emerald-500/0 group-hover:from-emerald-500/10 group-hover:via-emerald-500/5 group-hover:to-emerald-500/10 rounded-2xl transition-all duration-700 opacity-0 group-hover:opacity-100 pointer-events-none" />
+        
+        {/* Animated corner accent */}
+        <div className="absolute top-0 right-0 w-32 h-32 bg-emerald-500/10 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
         {/* Content */}
         <div className="relative z-10">
@@ -101,7 +105,7 @@ export function EnhancedInvoiceCard({ invoice, index = 0 }: EnhancedInvoiceCardP
           <div className="grid grid-cols-3 gap-2 mb-4">
             <div className="bg-white/[0.02] border border-white/[0.05] rounded-lg p-2.5">
               <p className="text-xs text-gray-500 mb-0.5">APR</p>
-              <p className="text-sm font-semibold text-blue-400">
+              <p className="text-sm font-semibold text-emerald-400">
                 {(riskScore.interestRate * 100).toFixed(1)}%
               </p>
             </div>
@@ -113,7 +117,7 @@ export function EnhancedInvoiceCard({ invoice, index = 0 }: EnhancedInvoiceCardP
             </div>
             <div className="bg-white/[0.02] border border-white/[0.05] rounded-lg p-2.5">
               <p className="text-xs text-gray-500 mb-0.5">Days</p>
-              <p className="text-sm font-semibold text-purple-400">
+              <p className="text-sm font-semibold text-emerald-400">
                 {daysToMaturity}
               </p>
             </div>
@@ -131,7 +135,7 @@ export function EnhancedInvoiceCard({ invoice, index = 0 }: EnhancedInvoiceCardP
                   initial={{ width: 0 }}
                   animate={{ width: `${invoice.funded_percentage}%` }}
                   transition={{ duration: 1, delay: 0.3 + index * 0.05 }}
-                  className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
+                  className="h-full bg-gradient-to-r from-emerald-500 to-emerald-400 rounded-full"
                 />
               </div>
             </div>
@@ -139,9 +143,13 @@ export function EnhancedInvoiceCard({ invoice, index = 0 }: EnhancedInvoiceCardP
 
           {/* CTA Button - Clean and clickable */}
           <Link href={`/invoice/${invoice.id}`} className="block">
-            <button className="w-full px-4 py-2.5 rounded-lg bg-white/[0.05] border border-white/[0.1] hover:bg-white/[0.08] hover:border-white/[0.15] text-white text-sm font-medium transition-all duration-300 group-hover:shadow-lg group-hover:shadow-blue-500/20">
-              View Details
-            </button>
+            <motion.button 
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
+              className="w-full px-4 py-2.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 hover:bg-emerald-500/20 hover:border-emerald-500/50 text-white text-sm font-semibold transition-all duration-300 group-hover:shadow-lg group-hover:shadow-emerald-500/30"
+            >
+              View Details →
+            </motion.button>
           </Link>
         </div>
       </div>

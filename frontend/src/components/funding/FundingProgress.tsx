@@ -59,7 +59,7 @@ export function FundingProgress({
   };
 
   return (
-    <div className="card space-y-6 hover:border-sage-green-500/30">
+    <div className="card space-y-6 hover:border-emerald-500/30">
       <div>
         <h3 className="text-xl font-bold mb-2 text-off-white">Invoice #{invoiceId}</h3>
         <p className="text-sm text-light-gray">
@@ -79,11 +79,11 @@ export function FundingProgress({
         </div>
         <div className="w-full bg-medium-gray/30 rounded-full h-4 overflow-hidden">
           <div
-            className="bg-gradient-to-r from-sage-green-500 to-sage-green-400 h-4 rounded-full transition-all duration-500 shadow-lg"
+            className="bg-gradient-to-r from-emerald-500 to-emerald-400 h-4 rounded-full transition-all duration-500 shadow-lg"
             style={{ width: `${Math.min(actualPercentage, 100)}%` }}
           ></div>
         </div>
-        <p className="text-base text-sage-green-400 mt-3 font-bold">
+        <p className="text-base text-emerald-400 mt-3 font-bold">
           {Math.round(actualPercentage)}% funded
           {isLoading && <span className="text-xs text-light-gray ml-2">(updating...)</span>}
         </p>
@@ -93,14 +93,14 @@ export function FundingProgress({
       <div className="grid grid-cols-2 gap-4">
         <div className="bg-dark-gray/50 rounded-lg p-4 border border-medium-gray/20">
           <p className="text-xs text-light-gray mb-2 font-medium">Interest Rate</p>
-          <p className="text-2xl font-bold text-sage-green-400">
+          <p className="text-2xl font-bold text-emerald-400">
             {actualInterestRate}%
           </p>
           <p className="text-xs text-light-gray mt-1">APR</p>
         </div>
         <div className="bg-dark-gray/50 rounded-lg p-4 border border-medium-gray/20">
           <p className="text-xs text-light-gray mb-2 font-medium">Time Left</p>
-          <p className="text-2xl font-bold text-sage-green-400">
+          <p className="text-2xl font-bold text-emerald-400">
             {daysLeft}
           </p>
           <p className="text-xs text-light-gray mt-1">days</p>
@@ -135,9 +135,9 @@ export function FundingProgress({
       )}
 
       {/* Info */}
-      <div className="bg-sage-green-500/5 border border-sage-green-500/20 rounded-lg p-4">
+      <div className="bg-emerald-500/5 border border-emerald-500/20 rounded-lg p-4">
         <p className="text-sm text-light-gray flex items-start gap-2">
-          <span className="text-sage-green-400 flex-shrink-0">🔒</span>
+          <span className="text-emerald-400 flex-shrink-0">🔒</span>
           <span>Funds are held in smart contract escrow. Released only when invoice is paid by buyer.</span>
         </p>
       </div>

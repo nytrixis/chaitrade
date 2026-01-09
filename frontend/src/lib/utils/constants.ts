@@ -26,7 +26,7 @@ export const INVOICE_STATUS_LABELS: Record<InvoiceStatus, string> = {
 export const INVOICE_STATUS_COLORS: Record<InvoiceStatus, string> = {
   [INVOICE_STATUS.PENDING]: 'bg-yellow-500/20 text-yellow-400',
   [INVOICE_STATUS.ACTIVE]: 'bg-blue-500/20 text-blue-400',
-  [INVOICE_STATUS.FUNDED]: 'bg-sage-green-500/20 text-sage-green-400',
+  [INVOICE_STATUS.FUNDED]: 'bg-emerald-500/20 text-emerald-400',
   [INVOICE_STATUS.SETTLED]: 'bg-purple-500/20 text-purple-400',
   [INVOICE_STATUS.DEFAULTED]: 'bg-red-500/20 text-red-400',
 };
@@ -62,7 +62,7 @@ export type RiskLevel = typeof RISK_LEVELS[keyof typeof RISK_LEVELS];
 
 // Risk Level Colors
 export const RISK_LEVEL_COLORS: Record<RiskLevel, string> = {
-  [RISK_LEVELS.LOW]: 'text-sage-green-400',
+  [RISK_LEVELS.LOW]: 'text-emerald-400',
   [RISK_LEVELS.MEDIUM]: 'text-blue-400',
   [RISK_LEVELS.HIGH]: 'text-yellow-400',
   [RISK_LEVELS.VERY_HIGH]: 'text-red-400',

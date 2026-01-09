@@ -112,15 +112,15 @@ export function DisputeResolution({
               <h4 className="font-semibold text-off-white mb-2">What happens next?</h4>
               <ul className="space-y-2 text-light-gray">
                 <li className="flex gap-2">
-                  <span className="text-sage-green-400">1.</span>
+                  <span className="text-emerald-400">1.</span>
                   <span>You can raise a dispute if payment has not been received</span>
                 </li>
                 <li className="flex gap-2">
-                  <span className="text-sage-green-400">2.</span>
+                  <span className="text-emerald-400">2.</span>
                   <span>Dispute will be reviewed by the dispute resolution protocol</span>
                 </li>
                 <li className="flex gap-2">
-                  <span className="text-sage-green-400">3.</span>
+                  <span className="text-emerald-400">3.</span>
                   <span>Resolution will be executed automatically via smart contract</span>
                 </li>
               </ul>
@@ -241,7 +241,7 @@ export function DisputeResolution({
         /* Success State */
         <div className="text-center py-6">
           <div className="text-6xl mb-4">✅</div>
-          <h3 className="text-2xl font-bold text-sage-green-400 mb-2">
+          <h3 className="text-2xl font-bold text-emerald-400 mb-2">
             Dispute Raised Successfully
           </h3>
           <p className="text-light-gray mb-4">
@@ -269,7 +269,7 @@ export function DisputeResolution({
                     href={`https://testnet.snowtrace.io/tx/${hash}`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="font-mono text-xs text-sage-green-400 hover:text-sage-green-300 break-all"
+                    className="font-mono text-xs text-emerald-400 hover:text-sage-green-300 break-all"
                   >
                     {hash}
                   </a>
@@ -307,7 +307,7 @@ export function DisputeStatusBadge({ status }: { status: 'none' | 'pending' | 'r
   const config = {
     none: { color: 'bg-medium-gray/20 text-light-gray', label: 'No Dispute', icon: '○' },
     pending: { color: 'bg-yellow-500/20 text-yellow-400', label: 'Dispute Pending', icon: '⚠️' },
-    resolved: { color: 'bg-sage-green-500/20 text-sage-green-400', label: 'Dispute Resolved', icon: '✓' },
+    resolved: { color: 'bg-emerald-500/20 text-emerald-400', label: 'Dispute Resolved', icon: '✓' },
     rejected: { color: 'bg-red-500/20 text-red-400', label: 'Dispute Rejected', icon: '✕' },
   };
 
