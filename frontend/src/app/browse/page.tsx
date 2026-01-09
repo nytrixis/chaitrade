@@ -3,8 +3,10 @@
 import { useEffect, useState } from 'react';
 import { useAccount } from 'wagmi';
 import Link from 'next/link';
+import { motion } from 'framer-motion';
 import { getActiveInvoices, Invoice } from '@/lib/supabase/invoices';
-import { InvoiceCard, InvoiceCardSkeleton, InvoiceCardGrid, InvoiceCardEmpty } from '@/components/invoice/InvoiceCard';
+import { EnhancedInvoiceCard } from '@/components/invoice/EnhancedInvoiceCard';
+import { InvoiceCardSkeleton, InvoiceCardGrid, InvoiceCardEmpty } from '@/components/invoice/InvoiceCard';
 import { CREDIT_SCORE_RANGES } from '@/lib/utils/constants';
 
 type FilterStatus = 'all' | 'pending' | 'active' | 'funded';
@@ -110,30 +112,27 @@ export default function BrowsePage() {
           </p>
         </div>
 
-        {/* Stats Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
-          <div className="card">
-            <div className="text-sm text-light-gray mb-1">Total Invoices</div>
-            <div className="text-2xl font-bold text-off-white">{invoices.length}</div>
-          </div>
-          <div className="card">
-            <div className="text-sm text-light-gray mb-1">Active</div>
-            <div className="text-2xl font-bold text-blue-400">
-              {invoices.filter(i => i.status === 'active').length}
-            </div>
-          </div>
-          <div className="card">
-            <div className="text-sm text-light-gray mb-1">Pending</div>
-            <div className="text-2xl font-bold text-yellow-400">
-              {invoices.filter(i => i.status === 'pending').length}
-            </div>
-          </div>
-          <div className="card">
-            <div className="text-sm text-light-gray mb-1">Avg Credit Score</div>
-            <div className="text-2xl font-bold text-sage-green-400">
-              {invoices.length > 0 ? Math.round(invoices.reduce((sum, i) => sum + i.credit_score, 0) / invoices.length) : 0}
-            </div>
-          </div>
+        {/* Stats Cards - Clean & Minimal */}
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3 mb-8">
+          {[
+            { label: 'Total Invoices', value: invoices.length, color: 'text-white' },
+            { label: 'Active', value: invoices.filter(i => i.status === 'active').length, color: 'text-blue-400' },
+            { label: 'Pending', value: invoices.filter(i => i.status === 'pending').length, color: 'text-yellow-400' },
+            { label: 'Avg Score', value: invoices.length > 0 ? Math.round(invoices.reduce((sum, i) => sum + i.credit_score, 0) / invoices.length) : 0, color: 'text-emerald-400' }
+          ].map((stat, index) => (
+            <motion.div
+              key={stat.label}
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.3, delay: index * 0.05 }}
+              className="relative group"
+            >
+              <div className="relative h-full backdrop-blur-sm bg-white/[0.03] border border-white/[0.08] rounded-xl p-4 hover:border-white/[0.12] hover:bg-white/[0.05] transition-all duration-300">
+                <div className="text-xs text-gray-500 mb-1">{stat.label}</div>
+                <div className={`text-2xl font-semibold ${stat.color}`}>{stat.value}</div>
+              </div>
+            </motion.div>
+          ))}
         </div>
 
         {/* Filters and Search */}
@@ -317,44 +316,62 @@ export default function BrowsePage() {
           />
         )}
 
-        {/* Invoice Grid */}
+        {/* Invoice Grid - Enhanced with Animations */}
         {!loading && !error && filteredInvoices.length > 0 && (
-          <InvoiceCardGrid>
-            {filteredInvoices.map((invoice) => (
-              <InvoiceCard
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.3 }}
+            className="grid gap-6 md:grid-cols-2 lg:grid-cols-3"
+          >
+            {filteredInvoices.map((invoice, index) => (
+              <EnhancedInvoiceCard
                 key={invoice.id}
-                invoice={invoice}
-                fundingProgress={0} // This will be fetched from smart contract in next task
-                showOwner={false}
+                invoice={{
+                  id: invoice.invoice_nft_id,
+                  amount: invoice.amount,
+                  buyer_name: invoice.buyer_name,
+                  credit_score: invoice.credit_score,
+                  due_date: invoice.due_date,
+                  status: invoice.status || 'pending',
+                  funded_percentage: 0 // This will be fetched from smart contract in next task
+                }}
+                index={index}
               />
             ))}
-          </InvoiceCardGrid>
+          </motion.div>
         )}
 
-        {/* Info Footer */}
-        <div className="mt-12 card bg-dark-gray/50">
-          <div className="grid md:grid-cols-3 gap-6 text-center">
-            <div>
-              <div className="text-3xl mb-2">🔒</div>
-              <h3 className="font-semibold text-off-white mb-1">Secure Investments</h3>
-              <p className="text-sm text-light-gray">
-                All invoices are verified and secured by blockchain technology
-              </p>
-            </div>
-            <div>
-              <div className="text-3xl mb-2">⚡</div>
-              <h3 className="font-semibold text-off-white mb-1">ZK-Verified Credit</h3>
-              <p className="text-sm text-light-gray">
-                Credit scores verified using zero-knowledge proofs for privacy
-              </p>
-            </div>
-            <div>
-              <div className="text-3xl mb-2">💰</div>
-              <h3 className="font-semibold text-off-white mb-1">Attractive Returns</h3>
-              <p className="text-sm text-light-gray">
-                Earn competitive returns by funding verified MSMEs
-              </p>
-            </div>
+        {/* Info Footer - Clean & Simple */}
+        <div className="mt-12 backdrop-blur-sm bg-white/[0.03] border border-white/[0.08] rounded-2xl p-8">
+          <div className="grid md:grid-cols-3 gap-8 text-center">
+            {[
+              {
+                icon: '🔒',
+                title: 'Secure',
+                description: 'Blockchain verified invoices'
+              },
+              {
+                icon: '⚡',
+                title: 'Private',
+                description: 'Zero-knowledge credit proofs'
+              },
+              {
+                icon: '💰',
+                title: 'Profitable',
+                description: 'Competitive returns on investment'
+              }
+            ].map((feature, index) => (
+              <div key={feature.title} className="group/item">
+                <div className="text-3xl mb-3">{feature.icon}</div>
+                <h3 className="font-semibold text-white mb-1.5 text-sm">
+                  {feature.title}
+                </h3>
+                <p className="text-xs text-gray-500 leading-relaxed">
+                  {feature.description}
+                </p>
+              </div>
+            ))}
           </div>
         </div>
       </div>

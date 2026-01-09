@@ -1,262 +1,268 @@
 /**
- * Risk scoring system for invoice financing
- * Calculates risk based on multiple factors
+ * Risk Scoring Calculator
+ * Mirrors the Solidity RiskScoring library for frontend calculations
  */
+
+export type IndustryRisk = 'LOW' | 'MEDIUM' | 'HIGH';
 
 export interface RiskFactors {
-  invoiceAmount: number;
-  paymentTermsDays: number;
-  msmeRepaymentRate: number;
-  buyerRating: number;
-  msmeAge?: number; // in months
-  previousDefaults?: number;
+    creditScore: number;           // 650-950
+    paymentHistoryScore: number;   // 0-100 (% on-time payments)
+    invoiceAgeInDays: number;      // Days since invoice issue
+    buyerReputation: number;       // 0-100
+    invoiceAmount: number;         // in ETH/AVAX
+    msmeAnnualRevenue: number;     // in ETH/AVAX
+    industry: IndustryRisk;
 }
 
-export interface RiskResult {
-  score: number; // 1-10 (1 = safest, 10 = riskiest)
-  category: 'low' | 'medium' | 'high' | 'very_high';
-  apr: number; // Interest rate %
-  defaultProbability: number; // 0-10%
-  recommendation: 'recommended' | 'caution' | 'high_risk';
-  factors: {
-    amountRisk: number;
-    termRisk: number;
-    historyRisk: number;
-    buyerRisk: number;
-  };
+export interface RiskScore {
+    score: number;          // 0-100 (higher = riskier)
+    interestRate: number;   // APR as decimal (e.g., 0.18 = 18%)
+    rating: string;         // AAA, AA, A, BBB, BB, B, C
+    breakdown: {
+        creditRisk: number;
+        historyRisk: number;
+        ageRisk: number;
+        buyerRisk: number;
+        sizeRisk: number;
+        industryRisk: number;
+    };
+    defaultProbability: number; // Estimated default probability (%)
 }
 
 /**
- * Calculate comprehensive risk score for an invoice
- * Score: 1 = lowest risk (safest), 10 = highest risk (riskiest)
+ * Calculate comprehensive risk score from multiple factors
+ * @param factors Input risk factors
+ * @returns Risk score with rating and interest rate
  */
-export function calculateRiskScore(factors: RiskFactors): RiskResult {
-  // Start at 1 (safest) and add risk points
-  let riskPoints = 0;
+export function calculateRiskScore(factors: RiskFactors): RiskScore {
+    let score = 0;
+    const breakdown = {
+        creditRisk: 0,
+        historyRisk: 0,
+        ageRisk: 0,
+        buyerRisk: 0,
+        sizeRisk: 0,
+        industryRisk: 0,
+    };
 
-  // Track individual risk components
-  const riskComponents = {
-    amountRisk: 0,
-    termRisk: 0,
-    historyRisk: 0,
-    buyerRisk: 0,
-  };
-
-  // ==========================================
-  // Factor 1: Invoice Amount Risk
-  // ==========================================
-  // Higher amounts = slightly higher risk
-  if (factors.invoiceAmount > 10000000) { // > 1 Cr
-    riskComponents.amountRisk = 1.5;
-  } else if (factors.invoiceAmount > 5000000) { // > 50L
-    riskComponents.amountRisk = 1.0;
-  } else if (factors.invoiceAmount > 1000000) { // > 10L
-    riskComponents.amountRisk = 0.5;
-  } else {
-    riskComponents.amountRisk = 0;
-  }
-
-  // ==========================================
-  // Factor 2: Payment Terms Risk
-  // ==========================================
-  // Longer payment terms = higher risk
-  if (factors.paymentTermsDays > 180) {
-    riskComponents.termRisk = 2.0;
-  } else if (factors.paymentTermsDays > 120) {
-    riskComponents.termRisk = 1.5;
-  } else if (factors.paymentTermsDays > 90) {
-    riskComponents.termRisk = 1.0;
-  } else if (factors.paymentTermsDays > 60) {
-    riskComponents.termRisk = 0.5;
-  } else {
-    riskComponents.termRisk = 0;
-  }
-
-  // ==========================================
-  // Factor 3: MSME Repayment History (MOST IMPORTANT)
-  // ==========================================
-  // Repayment rate: 0-100 (percentage of on-time payments)
-  const repaymentScore = factors.msmeRepaymentRate / 10; // Convert to 0-10 scale
-  riskComponents.historyRisk = 10 - repaymentScore;
-
-  // Bonus for perfect repayment
-  if (factors.msmeRepaymentRate >= 95) {
-    riskComponents.historyRisk -= 1;
-  }
-
-  // Penalty for defaults
-  if (factors.previousDefaults && factors.previousDefaults > 0) {
-    riskComponents.historyRisk += factors.previousDefaults * 0.5;
-  }
-
-  // ==========================================
-  // Factor 4: Buyer Reputation/Rating
-  // ==========================================
-  // Buyer rating: 0-10 (creditworthiness of the buyer)
-  const buyerScore = factors.buyerRating / 10; // Normalize to 0-1
-  riskComponents.buyerRisk = (10 - factors.buyerRating) * 0.5;
-
-  // ==========================================
-  // Factor 5: MSME Age (Optional)
-  // ==========================================
-  if (factors.msmeAge !== undefined) {
-    if (factors.msmeAge < 6) {
-      // Very new MSMEs are riskier
-      riskComponents.historyRisk += 1;
-    } else if (factors.msmeAge < 12) {
-      riskComponents.historyRisk += 0.5;
+    // Factor 1: Credit Score (30% weight)
+    // Map 650-950 to 0-30 risk points (inverse)
+    if (factors.creditScore >= 850) {
+        breakdown.creditRisk = 0;  // Excellent
+    } else if (factors.creditScore >= 750) {
+        breakdown.creditRisk = 5;  // Very good
+    } else if (factors.creditScore >= 700) {
+        breakdown.creditRisk = 10; // Good
+    } else if (factors.creditScore >= 650) {
+        breakdown.creditRisk = 20; // Fair
+    } else {
+        breakdown.creditRisk = 30; // Poor
     }
-  }
 
-  // ==========================================
-  // Calculate Weighted Score
-  // ==========================================
-  // Weights: History (50%), Buyer (25%), Terms (15%), Amount (10%)
-  const totalRisk =
-    riskComponents.historyRisk * 0.5 +
-    riskComponents.buyerRisk * 0.25 +
-    riskComponents.termRisk * 0.15 +
-    riskComponents.amountRisk * 0.1;
+    // Factor 2: Payment History (30% weight)
+    // 100% on-time = 0 risk, 0% on-time = 30 risk
+    breakdown.historyRisk = Math.round(((100 - factors.paymentHistoryScore) * 30) / 100);
 
-  // Score: 1 = lowest risk (safest), 10 = highest risk (riskiest)
-  // totalRisk ranges from ~0 to ~10, so we clamp it
-  const score = Math.max(1, Math.min(10, 1 + totalRisk));
+    // Factor 3: Invoice Age (15% weight)
+    // Fresh invoice (0-7 days) = 0 risk
+    // Old invoice (90+ days) = 15 risk
+    if (factors.invoiceAgeInDays > 90) {
+        breakdown.ageRisk = 15; // Very old
+    } else if (factors.invoiceAgeInDays > 30) {
+        breakdown.ageRisk = 10; // Old
+    } else if (factors.invoiceAgeInDays > 7) {
+        breakdown.ageRisk = 5;  // Slightly old
+    } else {
+        breakdown.ageRisk = 0;  // Fresh
+    }
 
-  // ==========================================
-  // Determine Risk Category (inverted - lower score = lower risk)
-  // ==========================================
-  let category: 'low' | 'medium' | 'high' | 'very_high';
-  if (score <= 3) {
-    category = 'low';
-  } else if (score <= 5) {
-    category = 'medium';
-  } else if (score <= 7) {
-    category = 'high';
-  } else {
-    category = 'very_high';
-  }
+    // Factor 4: Buyer Reputation (15% weight)
+    // 100 reputation = 0 risk, 0 reputation = 15 risk
+    breakdown.buyerRisk = Math.round(((100 - factors.buyerReputation) * 15) / 100);
 
-  // ==========================================
-  // Calculate APR (direct relationship with score)
-  // ==========================================
-  // Score 1 = 18% APR (low risk, low return)
-  // Score 10 = 36% APR (high risk, high return)
-  const apr = Math.round(18 + ((score - 1) * 2));
+    // Factor 5: Size Ratio (10% weight)
+    // Large invoice vs small revenue = risky
+    const sizeRatio = (factors.invoiceAmount / factors.msmeAnnualRevenue) * 100;
+    if (sizeRatio > 50) {
+        breakdown.sizeRisk = 10; // Invoice > 50% of revenue
+    } else if (sizeRatio > 30) {
+        breakdown.sizeRisk = 5;  // Invoice > 30% of revenue
+    } else {
+        breakdown.sizeRisk = 0;  // Invoice < 30% of revenue
+    }
 
-  // ==========================================
-  // Calculate Default Probability
-  // ==========================================
-  // Score 1 = 0.5% default risk
-  // Score 10 = 10% default risk
-  const defaultProbability = Number(((score - 1) * 1.05 + 0.5).toFixed(2));
+    // Factor 6: Industry Risk (10% weight)
+    breakdown.industryRisk =
+        factors.industry === 'HIGH' ? 10 :
+        factors.industry === 'MEDIUM' ? 5 : 0;
 
-  // ==========================================
-  // Generate Recommendation
-  // ==========================================
-  let recommendation: 'recommended' | 'caution' | 'high_risk';
-  if (category === 'low') {
-    recommendation = 'recommended';
-  } else if (category === 'medium') {
-    recommendation = 'caution';
-  } else {
-    recommendation = 'high_risk';
-  }
+    // Sum all risks
+    score = Object.values(breakdown).reduce((a, b) => a + b, 0);
+    score = Math.min(score, 100);
 
-  return {
-    score: Number(score.toFixed(1)),
-    category,
-    apr,
-    defaultProbability,
-    recommendation,
-    factors: riskComponents,
-  };
+    // Calculate interest rate
+    // Base rate: 8% (0.08)
+    // Risk premium: +0.1% per risk point (0.001 per point)
+    // Range: 8% (score 0) to 18% (score 100)
+    const interestRate = 0.08 + (score * 0.001);
+
+    // Determine credit rating
+    let rating: string;
+    if (score <= 10) {
+        rating = 'AAA'; // Exceptional quality
+    } else if (score <= 20) {
+        rating = 'AA';  // Excellent quality
+    } else if (score <= 35) {
+        rating = 'A';   // Good quality
+    } else if (score <= 50) {
+        rating = 'BBB'; // Medium quality
+    } else if (score <= 65) {
+        rating = 'BB';  // Speculative
+    } else if (score <= 80) {
+        rating = 'B';   // Highly speculative
+    } else {
+        rating = 'C';   // Substantial risk
+    }
+
+    // Calculate default probability (0.5% to 15%)
+    const defaultProbability = 0.5 + ((score * 14.5) / 100);
+
+    return {
+        score,
+        interestRate,
+        rating,
+        breakdown,
+        defaultProbability,
+    };
 }
 
 /**
- * Calculate risk score from invoice data
+ * Get interest rate from risk score
+ * @param score Risk score (0-100)
+ * @returns Interest rate as decimal
  */
-export function calculateInvoiceRisk(invoice: {
-  amount: number;
-  due_date: string;
-  credit_score: number;
-  msme_address: string;
-}): RiskResult {
-  // Calculate payment terms from due date
-  const dueDate = new Date(invoice.due_date);
-  const now = new Date();
-  const paymentTermsDays = Math.ceil((dueDate.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
-
-  // Mock buyer rating (in production, this would come from buyer credit data)
-  const buyerRating = 7.5;
-
-  // Mock MSME repayment rate (in production, this would come from credit history)
-  // For now, use credit score as proxy
-  const msmeRepaymentRate = Math.min(100, (invoice.credit_score / 900) * 100);
-
-  const factors: RiskFactors = {
-    invoiceAmount: invoice.amount,
-    paymentTermsDays: Math.max(1, paymentTermsDays),
-    msmeRepaymentRate,
-    buyerRating,
-  };
-
-  return calculateRiskScore(factors);
+export function getInterestForScore(score: number): number {
+    return 0.08 + (score * 0.001);
 }
 
 /**
- * Get risk category color for UI
+ * Get credit rating from risk score
+ * @param score Risk score (0-100)
+ * @returns Credit rating string
  */
-export function getRiskCategoryColor(category: RiskResult['category']): string {
-  switch (category) {
-    case 'low':
-      return 'text-sage-green-400';
-    case 'medium':
-      return 'text-blue-400';
-    case 'high':
-      return 'text-yellow-400';
-    case 'very_high':
-      return 'text-red-400';
-  }
+export function getRatingForScore(score: number): string {
+    if (score <= 10) return 'AAA';
+    if (score <= 20) return 'AA';
+    if (score <= 35) return 'A';
+    if (score <= 50) return 'BBB';
+    if (score <= 65) return 'BB';
+    if (score <= 80) return 'B';
+    return 'C';
 }
 
 /**
- * Get risk category label
+ * Get rating color for UI display
+ * @param rating Credit rating
+ * @returns Tailwind color classes
  */
-export function getRiskCategoryLabel(category: RiskResult['category']): string {
-  switch (category) {
-    case 'low':
-      return 'Low Risk';
-    case 'medium':
-      return 'Medium Risk';
-    case 'high':
-      return 'High Risk';
-    case 'very_high':
-      return 'Very High Risk';
-  }
+export function getRatingColor(rating: string): string {
+    if (rating.startsWith('AAA')) return 'text-green-700 bg-green-50';
+    if (rating.startsWith('AA')) return 'text-green-600 bg-green-50';
+    if (rating.startsWith('A')) return 'text-lime-600 bg-lime-50';
+    if (rating === 'BBB') return 'text-yellow-600 bg-yellow-50';
+    if (rating.startsWith('BB')) return 'text-orange-600 bg-orange-50';
+    if (rating === 'B') return 'text-red-600 bg-red-50';
+    return 'text-red-700 bg-red-100';
 }
 
 /**
- * Get recommendation badge variant
+ * Get risk category from score
+ * @param score Risk score (0-100)
+ * @returns Risk category string
  */
-export function getRecommendationBadge(recommendation: RiskResult['recommendation']): {
-  text: string;
-  className: string;
-} {
-  switch (recommendation) {
-    case 'recommended':
-      return {
-        text: '✅ Recommended Investment',
-        className: 'bg-sage-green-500/20 text-sage-green-400 border-sage-green-500/30',
-      };
-    case 'caution':
-      return {
-        text: '⚠️ Invest with Caution',
-        className: 'bg-yellow-500/20 text-yellow-400 border-yellow-500/30',
-      };
-    case 'high_risk':
-      return {
-        text: '⛔ High Risk - Not Recommended',
-        className: 'bg-red-500/20 text-red-400 border-red-500/30',
-      };
-  }
+export function getRiskCategory(score: number): string {
+    if (score <= 20) return 'Low Risk';
+    if (score <= 50) return 'Medium Risk';
+    if (score <= 80) return 'High Risk';
+    return 'Critical Risk';
+}
+
+/**
+ * Validate risk factors
+ * @param factors Risk factors to validate
+ * @returns True if valid, error message if invalid
+ */
+export function validateRiskFactors(factors: RiskFactors): { valid: boolean; error?: string } {
+    if (factors.creditScore < 300 || factors.creditScore > 950) {
+        return { valid: false, error: 'Credit score must be between 300 and 950' };
+    }
+    if (factors.paymentHistoryScore < 0 || factors.paymentHistoryScore > 100) {
+        return { valid: false, error: 'Payment history must be between 0 and 100' };
+    }
+    if (factors.invoiceAgeInDays < 0 || factors.invoiceAgeInDays > 365) {
+        return { valid: false, error: 'Invoice age must be between 0 and 365 days' };
+    }
+    if (factors.buyerReputation < 0 || factors.buyerReputation > 100) {
+        return { valid: false, error: 'Buyer reputation must be between 0 and 100' };
+    }
+    if (factors.invoiceAmount <= 0) {
+        return { valid: false, error: 'Invoice amount must be positive' };
+    }
+    if (factors.msmeAnnualRevenue <= 0) {
+        return { valid: false, error: 'MSME revenue must be positive' };
+    }
+    if (!['LOW', 'MEDIUM', 'HIGH'].includes(factors.industry)) {
+        return { valid: false, error: 'Industry must be LOW, MEDIUM, or HIGH' };
+    }
+
+    return { valid: true };
+}
+
+/**
+ * Convert risk factors to Solidity format for contract calls
+ * @param factors Risk factors
+ * @returns Tuple compatible with contract
+ */
+export function riskFactorsToContractFormat(factors: RiskFactors) {
+    return {
+        creditScore: BigInt(factors.creditScore),
+        paymentHistory: BigInt(factors.paymentHistoryScore),
+        invoiceAge: BigInt(factors.invoiceAgeInDays),
+        buyerReputation: BigInt(factors.buyerReputation),
+        invoiceAmount: BigInt(0), // Set by contract
+        msmeRevenue: BigInt(Math.floor(factors.msmeAnnualRevenue * 1e18)), // Convert to wei
+        industry: factors.industry === 'LOW' ? 0 : factors.industry === 'MEDIUM' ? 1 : 2,
+    };
+}
+
+/**
+ * Calculate expected returns for investors
+ * @param principal Investment amount in AVAX
+ * @param interestRate APR as decimal (e.g., 0.18)
+ * @param daysToMaturity Days until invoice due date
+ * @param platformFee Platform fee as decimal (e.g., 0.05)
+ * @returns Expected return object
+ */
+export function calculateExpectedReturns(
+    principal: number,
+    interestRate: number,
+    daysToMaturity: number,
+    platformFee: number = 0.05
+) {
+    // Simple interest calculation
+    const interest = (principal * interestRate * daysToMaturity) / 365;
+    const platformFeeAmount = interest * platformFee;
+    const netInterest = interest - platformFeeAmount;
+    const totalReturn = principal + netInterest;
+
+    return {
+        principal,
+        grossInterest: interest,
+        platformFeeAmount,
+        netInterest,
+        totalReturn,
+        roi: ((netInterest / principal) * 100).toFixed(2) + '%',
+        apr: (interestRate * 100).toFixed(2) + '%',
+    };
 }

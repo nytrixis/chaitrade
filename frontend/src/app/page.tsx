@@ -43,7 +43,7 @@ export default function Home() {
         {/* Animated background elements */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <motion.div
-            className="absolute top-1/4 -left-1/4 w-96 h-96 bg-sage-green-500/10 rounded-full blur-3xl"
+            className="absolute top-1/4 -left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl"
             animate={{
               scale: [1, 1.2, 1],
               opacity: [0.3, 0.5, 0.3]
@@ -51,7 +51,7 @@ export default function Home() {
             transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
           />
           <motion.div
-            className="absolute bottom-1/4 -right-1/4 w-[600px] h-[600px] bg-sage-green-500/10 rounded-full blur-3xl"
+            className="absolute bottom-1/4 -right-1/4 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-3xl"
             animate={{
               scale: [1.2, 1, 1.2],
               opacity: [0.2, 0.4, 0.2]
@@ -67,46 +67,62 @@ export default function Home() {
           variants={staggerContainer}
         >
           <motion.div
-            className="inline-flex items-center gap-2 mb-8"
+            className="inline-flex items-center gap-2 mb-6"
             variants={fadeInUp}
           >
-            <div className="h-px w-12 bg-sage-green-500/50" />
-            <p className="text-xl text-sage-green-400 tracking-wide font-bold">
+            <div className="h-px w-8 bg-emerald-400/50" />
+            <p className="text-sm text-emerald-400 tracking-wider font-medium uppercase">
               ChaiTrade
             </p>
           </motion.div>
 
           <motion.h1
-            className="text-6xl md:text-7xl lg:text-8xl font-bold text-off-white leading-[1.1] max-w-5xl mb-8"
+            className="text-5xl md:text-6xl lg:text-7xl font-bold text-white leading-tight max-w-4xl mb-6"
             variants={fadeInUp}
           >
             Invoices settle late.
             <br />
-            <span className="bg-gradient-to-r from-sage-green-400 to-sage-green-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-emerald-400 to-emerald-500 bg-clip-text text-transparent">
               Capital shouldn&apos;t.
             </span>
           </motion.h1>
 
           <motion.p
-            className="mt-8 text-xl md:text-2xl text-light-gray/90 max-w-3xl leading-relaxed font-light"
+            className="text-base md:text-lg text-gray-400 max-w-2xl leading-relaxed"
             variants={fadeInUp}
           >
             Convert unpaid MSME invoices into fundable assets with locked capital and automatic settlement.
           </motion.p>
 
+          {/* Feature Badges - Nyvex Style */}
           <motion.div
-            className="flex gap-5 mt-12 flex-col sm:flex-row items-start"
+            className="flex flex-wrap gap-3 mt-8 max-w-2xl"
+            variants={fadeInUp}
+          >
+            {['Blockchain Secured', 'ZK-Verified', 'Auto Settlement'].map((feature) => (
+              <div
+                key={feature}
+                className="bg-white/[0.03] backdrop-blur-sm px-4 py-2 rounded-full border border-white/[0.08] flex items-center"
+              >
+                <span className="w-1.5 h-1.5 bg-emerald-400 rounded-full mr-2 animate-pulse"></span>
+                <span className="text-white text-sm font-medium">{feature}</span>
+              </div>
+            ))}
+          </motion.div>
+
+          <motion.div
+            className="flex gap-4 mt-10 flex-col sm:flex-row items-start"
             variants={fadeInUp}
           >
             <Link
               href="/msme"
-              className="group inline-block bg-sage-green-500 text-charcoal font-bold text-lg px-10 py-5 rounded-xl hover:bg-sage-green-400 active:bg-sage-green-600 transition-all duration-200 hover:scale-105 hover:shadow-2xl hover:shadow-sage-green-500/30"
+              className="group inline-block bg-emerald-500 text-white font-semibold text-base px-8 py-3.5 rounded-xl hover:bg-emerald-400 transition-all duration-200 hover:shadow-lg hover:shadow-emerald-500/30"
             >
               <span className="flex items-center gap-2">
                 Upload Invoice
                 <motion.span
                   className="inline-block"
-                  animate={{ x: [0, 4, 0] }}
+                  animate={{ x: [0, 3, 0] }}
                   transition={{ duration: 1.5, repeat: Infinity }}
                 >
                   →
@@ -115,24 +131,24 @@ export default function Home() {
             </Link>
             <Link
               href="/browse"
-              className="inline-block border-2 border-sage-green-500/30 text-sage-green-400 font-bold text-lg px-10 py-5 rounded-xl hover:border-sage-green-500/60 hover:bg-sage-green-500/10 active:bg-sage-green-500/20 transition-all duration-200"
+              className="inline-block border border-white/[0.12] bg-white/[0.03] text-white font-semibold text-base px-8 py-3.5 rounded-xl hover:border-white/[0.2] hover:bg-white/[0.06] transition-all duration-200"
             >
               View Live Demo
             </Link>
           </motion.div>
 
           <motion.div
-            className="mt-16 flex items-center gap-8"
+            className="mt-12 flex items-center gap-6"
             variants={fadeInUp}
           >
-            <div className="flex items-center gap-3">
-              <div className="w-2 h-2 rounded-full bg-sage-green-500 animate-pulse" />
-              <p className="text-sm text-medium-gray font-mono uppercase tracking-wider">
+            <div className="flex items-center gap-2">
+              <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+              <p className="text-xs text-gray-500 font-medium tracking-wide">
                 Live on Avalanche Fuji
               </p>
             </div>
-            <div className="h-4 w-px bg-medium-gray/30" />
-            <p className="text-sm text-medium-gray/60 font-mono">
+            <div className="h-3 w-px bg-white/[0.1]" />
+            <p className="text-xs text-gray-600">
               Testnet · No real funds
             </p>
           </motion.div>
@@ -144,20 +160,20 @@ export default function Home() {
         <section className="py-32 px-6 lg:px-12 border-t border-medium-gray/20 bg-gradient-to-b from-dark-gray/30 via-dark-gray/10 to-transparent relative">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_50%,rgba(61,139,104,0.08),transparent_60%)]" />
           <div className="max-w-7xl mx-auto relative z-10">
-            <motion.div className="text-center mb-20" variants={fadeIn}>
-              <motion.div className="inline-flex items-center gap-3 mb-6" variants={fadeInUp}>
-                <div className="h-px w-8 bg-sage-green-500/50" />
-                <p className="text-base text-sage-green-400 tracking-widest uppercase font-bold">
+            <motion.div className="text-center mb-16" variants={fadeIn}>
+              <motion.div className="inline-flex items-center gap-2 mb-4" variants={fadeInUp}>
+                <div className="h-px w-6 bg-emerald-400/50" />
+                <p className="text-xs text-emerald-400 tracking-widest uppercase font-medium">
                   Protocol Guarantees
                 </p>
-                <div className="h-px w-8 bg-sage-green-500/50" />
+                <div className="h-px w-6 bg-emerald-400/50" />
               </motion.div>
-              <motion.h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-off-white mb-6 leading-tight" variants={fadeInUp}>
+              <motion.h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight" variants={fadeInUp}>
                 Four invariants.
                 <br />
-                <span className="text-sage-green-400">Every transaction.</span>
+                <span className="text-emerald-400">Every transaction.</span>
               </motion.h2>
-              <motion.p className="text-lg md:text-xl text-light-gray/80 max-w-2xl mx-auto" variants={fadeInUp}>
+              <motion.p className="text-base text-gray-400 max-w-2xl mx-auto" variants={fadeInUp}>
                 Hardcoded rules that the protocol enforces unconditionally
               </motion.p>
             </motion.div>
@@ -189,11 +205,11 @@ export default function Home() {
 
       {/* SECTION 3 — INTERACTIVE DEMO */}
       <ScrollReveal>
-        <section className="py-24 px-6 bg-charcoal border-t border-b border-sage-green-500/10 relative">
-          <div className="absolute inset-0 bg-gradient-to-b from-sage-green-500/[0.02] via-transparent to-transparent pointer-events-none" />
+        <section className="py-24 px-6 bg-charcoal border-t border-b border-emerald-500/10 relative">
+          <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/[0.02] via-transparent to-transparent pointer-events-none" />
           <div className="max-w-6xl mx-auto relative">
             <motion.div className="text-center mb-12" variants={fadeInUp}>
-              <p className="text-xs text-sage-green-500 font-mono tracking-widest uppercase mb-3">Try it</p>
+              <p className="text-xs text-emerald-500 font-mono tracking-widest uppercase mb-3">Try it</p>
               <h2 className="text-2xl font-semibold text-off-white">
                 Live system demo
               </h2>
@@ -211,18 +227,18 @@ export default function Home() {
         <section className="py-32 px-6 lg:px-12 border-t border-medium-gray/10 bg-gradient-to-b from-charcoal via-dark-gray/20 to-charcoal relative">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_50%,rgba(61,139,104,0.05),transparent_70%)]" />
           <div className="max-w-7xl mx-auto relative z-10">
-            <motion.div className="text-center mb-20" variants={fadeIn}>
-              <motion.div className="inline-flex items-center gap-3 mb-6" variants={fadeInUp}>
-                <div className="h-px w-8 bg-sage-green-500/50" />
-                <p className="text-base text-sage-green-400 tracking-widest uppercase font-bold">
+            <motion.div className="text-center mb-16" variants={fadeIn}>
+              <motion.div className="inline-flex items-center gap-2 mb-4" variants={fadeInUp}>
+                <div className="h-px w-6 bg-emerald-400/50" />
+                <p className="text-xs text-emerald-400 tracking-widest uppercase font-medium">
                   How It Works
                 </p>
-                <div className="h-px w-8 bg-sage-green-500/50" />
+                <div className="h-px w-6 bg-emerald-400/50" />
               </motion.div>
-              <motion.h2 className="text-4xl md:text-5xl lg:text-6xl font-bold text-off-white mb-6 leading-tight" variants={fadeInUp}>
+              <motion.h2 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight" variants={fadeInUp}>
                 State machine flow
               </motion.h2>
-              <motion.p className="text-lg md:text-xl text-light-gray/80 max-w-3xl mx-auto" variants={fadeInUp}>
+              <motion.p className="text-base text-gray-400 max-w-2xl mx-auto" variants={fadeInUp}>
                 Every invoice follows a deterministic path from creation to settlement
               </motion.p>
             </motion.div>
@@ -245,21 +261,21 @@ export default function Home() {
         <section className="py-32 px-6 lg:px-12 border-t border-medium-gray/10 bg-gradient-to-b from-transparent via-dark-gray/30 to-transparent relative">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(61,139,104,0.05),transparent_70%)]" />
           <div className="max-w-6xl mx-auto relative z-10">
-            <motion.div className="text-center mb-20" variants={fadeIn}>
-              <motion.div className="inline-flex items-center gap-3 mb-6" variants={fadeInUp}>
-                <div className="h-px w-8 bg-sage-green-500/50" />
+            <motion.div className="text-center mb-16" variants={fadeIn}>
+              <motion.div className="inline-flex items-center gap-2 mb-4" variants={fadeInUp}>
+                <div className="h-px w-6 bg-emerald-400/50" />
                 <motion.h2
-                  className="text-base text-sage-green-400 tracking-widest uppercase font-bold"
+                  className="text-xs text-emerald-400 tracking-widest uppercase font-medium"
                   variants={fadeIn}
                 >
                   Privacy First
                 </motion.h2>
-                <div className="h-px w-8 bg-sage-green-500/50" />
+                <div className="h-px w-6 bg-emerald-400/50" />
               </motion.div>
-              <motion.p className="text-4xl md:text-5xl lg:text-6xl font-bold text-off-white mb-6 leading-tight" variants={fadeInUp}>
+              <motion.p className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight" variants={fadeInUp}>
                 Zero-knowledge verification
               </motion.p>
-              <motion.p className="text-lg md:text-xl text-light-gray/80 max-w-3xl mx-auto" variants={fadeInUp}>
+              <motion.p className="text-base text-gray-400 max-w-2xl mx-auto" variants={fadeInUp}>
                 Prove validity without revealing sensitive data
               </motion.p>
             </motion.div>
@@ -302,32 +318,32 @@ export default function Home() {
               </motion.div>
 
               <motion.div
-                className="bg-gradient-to-br from-sage-green-500/10 to-sage-green-500/5 border-2 border-sage-green-500/30 rounded-2xl p-10 relative overflow-hidden group backdrop-blur-sm"
+                className="bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border-2 border-emerald-500/30 rounded-2xl p-10 relative overflow-hidden group backdrop-blur-sm"
                 variants={fadeInUp}
                 whileHover={{ y: -8, scale: 1.02, boxShadow: "0 30px 60px -15px rgba(61, 139, 104, 0.35)" }}
               >
-                <div className="absolute top-0 right-0 w-48 h-48 bg-sage-green-500/15 rounded-full blur-3xl" />
-                <div className="absolute inset-0 bg-gradient-to-br from-sage-green-500/0 via-sage-green-500/5 to-sage-green-500/15 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
+                <div className="absolute top-0 right-0 w-48 h-48 bg-emerald-500/15 rounded-full blur-3xl" />
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 via-emerald-500/5 to-emerald-500/15 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
 
                 <div className="relative z-10">
                   <div className="inline-flex items-center gap-3 mb-8">
-                    <div className="w-12 h-12 rounded-xl bg-sage-green-500/20 flex items-center justify-center border border-sage-green-500/30">
-                      <span className="text-3xl text-sage-green-400">✓</span>
+                    <div className="w-12 h-12 rounded-xl bg-emerald-500/20 flex items-center justify-center border border-emerald-500/30">
+                      <span className="text-3xl text-emerald-400">✓</span>
                     </div>
-                    <h3 className="text-lg text-sage-green-400 font-mono tracking-widest uppercase font-bold">Proven</h3>
+                    <h3 className="text-lg text-emerald-400 font-mono tracking-widest uppercase font-bold">Proven</h3>
                   </div>
 
                   <ul className="space-y-5">
                     <li className="text-off-white text-lg md:text-xl flex items-center gap-4 group-hover:text-sage-green-50 transition-colors duration-300">
-                      <span className="text-sage-green-400 text-2xl font-bold">✓</span>
+                      <span className="text-emerald-400 text-2xl font-bold">✓</span>
                       <span className="font-semibold">Invoice authenticity</span>
                     </li>
                     <li className="text-off-white text-lg md:text-xl flex items-center gap-4 group-hover:text-sage-green-50 transition-colors duration-300">
-                      <span className="text-sage-green-400 text-2xl font-bold">✓</span>
+                      <span className="text-emerald-400 text-2xl font-bold">✓</span>
                       <span className="font-semibold">Amount owed</span>
                     </li>
                     <li className="text-off-white text-lg md:text-xl flex items-center gap-4 group-hover:text-sage-green-50 transition-colors duration-300">
-                      <span className="text-sage-green-400 text-2xl font-bold">✓</span>
+                      <span className="text-emerald-400 text-2xl font-bold">✓</span>
                       <span className="font-semibold">Settlement occurred</span>
                     </li>
                   </ul>
@@ -346,56 +362,56 @@ export default function Home() {
             className="max-w-7xl mx-auto relative z-10"
             variants={staggerContainer}
           >
-            <motion.div className="text-center mb-20" variants={fadeIn}>
-              <motion.div className="inline-flex items-center gap-3 mb-6" variants={fadeInUp}>
-                <div className="h-px w-8 bg-sage-green-500/50" />
+            <motion.div className="text-center mb-16" variants={fadeIn}>
+              <motion.div className="inline-flex items-center gap-2 mb-4" variants={fadeInUp}>
+                <div className="h-px w-6 bg-emerald-400/50" />
                 <motion.h2
-                  className="text-base text-sage-green-400 tracking-widest uppercase font-bold"
+                  className="text-xs text-emerald-400 tracking-widest uppercase font-medium"
                   variants={fadeIn}
                 >
                   The Problem
                 </motion.h2>
-                <div className="h-px w-8 bg-sage-green-500/50" />
+                <div className="h-px w-6 bg-emerald-400/50" />
               </motion.div>
-              <motion.p className="text-4xl md:text-5xl lg:text-6xl font-bold text-off-white mb-6 leading-tight" variants={fadeInUp}>
+              <motion.p className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-4 leading-tight" variants={fadeInUp}>
                 Market context
               </motion.p>
-              <motion.p className="text-lg md:text-xl text-light-gray/80 max-w-3xl mx-auto" variants={fadeInUp}>
+              <motion.p className="text-base text-gray-400 max-w-2xl mx-auto" variants={fadeInUp}>
                 Traditional financing fails small businesses when they need it most
               </motion.p>
             </motion.div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               <motion.div
-                className="bg-gradient-to-br from-dark-gray/60 to-dark-gray/30 border-2 border-sage-green-500/20 rounded-2xl p-10 text-center hover:border-sage-green-500/50 transition-all duration-500 backdrop-blur-sm group relative overflow-hidden"
+                className="bg-gradient-to-br from-dark-gray/60 to-dark-gray/30 border-2 border-emerald-500/20 rounded-2xl p-10 text-center hover:border-emerald-500/50 transition-all duration-500 backdrop-blur-sm group relative overflow-hidden"
                 variants={fadeInUp}
                 whileHover={{ y: -8, scale: 1.05, boxShadow: "0 30px 60px -15px rgba(61, 139, 104, 0.3)" }}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-sage-green-500/0 to-sage-green-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
                 <div className="relative z-10">
-                  <div className="text-6xl md:text-7xl lg:text-8xl font-bold font-mono text-sage-green-400 mb-5 group-hover:scale-110 transition-transform duration-300">63M</div>
+                  <div className="text-6xl md:text-7xl lg:text-8xl font-bold font-mono text-emerald-400 mb-5 group-hover:scale-110 transition-transform duration-300">63M</div>
                   <div className="text-base md:text-lg text-light-gray/90 leading-relaxed font-medium group-hover:text-off-white transition-colors duration-300">MSMEs affected by payment delays</div>
                 </div>
               </motion.div>
 
               <motion.div
-                className="bg-gradient-to-br from-dark-gray/60 to-dark-gray/30 border-2 border-sage-green-500/20 rounded-2xl p-10 text-center hover:border-sage-green-500/50 transition-all duration-500 backdrop-blur-sm group relative overflow-hidden"
+                className="bg-gradient-to-br from-dark-gray/60 to-dark-gray/30 border-2 border-emerald-500/20 rounded-2xl p-10 text-center hover:border-emerald-500/50 transition-all duration-500 backdrop-blur-sm group relative overflow-hidden"
                 variants={fadeInUp}
                 whileHover={{ y: -8, scale: 1.05, boxShadow: "0 30px 60px -15px rgba(61, 139, 104, 0.3)" }}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-sage-green-500/0 to-sage-green-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
                 <div className="relative z-10">
-                  <div className="text-6xl md:text-7xl lg:text-8xl font-bold font-mono text-sage-green-400 mb-5 group-hover:scale-110 transition-transform duration-300">45–90d</div>
+                  <div className="text-6xl md:text-7xl lg:text-8xl font-bold font-mono text-emerald-400 mb-5 group-hover:scale-110 transition-transform duration-300">45–90d</div>
                   <div className="text-base md:text-lg text-light-gray/90 leading-relaxed font-medium group-hover:text-off-white transition-colors duration-300">typical B2B payment cycle</div>
                 </div>
               </motion.div>
 
               <motion.div
-                className="bg-gradient-to-br from-sage-green-500/10 to-sage-green-500/5 border-2 border-sage-green-500/30 rounded-2xl p-10 flex items-center justify-center hover:border-sage-green-500/60 transition-all duration-500 backdrop-blur-sm group relative overflow-hidden"
+                className="bg-gradient-to-br from-emerald-500/10 to-emerald-500/5 border-2 border-emerald-500/30 rounded-2xl p-10 flex items-center justify-center hover:border-emerald-500/60 transition-all duration-500 backdrop-blur-sm group relative overflow-hidden"
                 variants={fadeInUp}
                 whileHover={{ y: -8, scale: 1.05, boxShadow: "0 30px 60px -15px rgba(61, 139, 104, 0.4)" }}
               >
-                <div className="absolute inset-0 bg-gradient-to-br from-sage-green-500/0 via-sage-green-500/10 to-sage-green-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
+                <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 via-emerald-500/10 to-emerald-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
                 <div className="relative z-10">
                   <div className="text-xl md:text-2xl text-off-white font-bold text-center leading-relaxed group-hover:text-sage-green-50 transition-colors duration-300">
                     Community financing exists.<br />This formalizes it.
@@ -409,11 +425,11 @@ export default function Home() {
 
       {/* SECTION 7 — FINAL CTA */}
       <ScrollReveal>
-        <section className="py-40 px-6 lg:px-12 bg-gradient-to-b from-dark-gray/50 via-charcoal to-charcoal border-t border-sage-green-500/10 relative overflow-hidden">
+        <section className="py-40 px-6 lg:px-12 bg-gradient-to-b from-dark-gray/50 via-charcoal to-charcoal border-t border-emerald-500/10 relative overflow-hidden">
           <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_50%,rgba(61,139,104,0.12),transparent_60%)]" />
           <div className="absolute inset-0">
             <motion.div
-              className="absolute top-1/4 left-1/4 w-96 h-96 bg-sage-green-500/10 rounded-full blur-3xl"
+              className="absolute top-1/4 left-1/4 w-96 h-96 bg-emerald-500/10 rounded-full blur-3xl"
               animate={{
                 scale: [1, 1.2, 1],
                 opacity: [0.3, 0.6, 0.3]
@@ -421,7 +437,7 @@ export default function Home() {
               transition={{ duration: 8, repeat: Infinity, ease: "easeInOut" }}
             />
             <motion.div
-              className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-sage-green-500/10 rounded-full blur-3xl"
+              className="absolute bottom-1/4 right-1/4 w-[600px] h-[600px] bg-emerald-500/10 rounded-full blur-3xl"
               animate={{
                 scale: [1.2, 1, 1.2],
                 opacity: [0.2, 0.5, 0.2]
@@ -440,47 +456,44 @@ export default function Home() {
               viewport={{ once: true }}
               transition={{ duration: 0.6, type: "spring", bounce: 0.5 }}
             >
-              <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-sage-green-500/20 to-sage-green-500/10 border-2 border-sage-green-500/30 flex items-center justify-center mx-auto shadow-2xl shadow-sage-green-500/20">
+              <div className="w-24 h-24 rounded-3xl bg-gradient-to-br from-emerald-500/20 to-emerald-500/10 border-2 border-emerald-500/30 flex items-center justify-center mx-auto shadow-2xl shadow-emerald-500/20">
                 <span className="text-5xl">⚡</span>
               </div>
             </motion.div>
 
             <motion.h2
-              className="text-5xl md:text-6xl lg:text-7xl font-bold text-off-white mb-8 leading-tight"
+              className="text-4xl md:text-5xl font-bold text-white mb-6 leading-tight"
               variants={fadeInUp}
             >
               See it work
             </motion.h2>
             <motion.p
-              className="text-xl md:text-2xl text-light-gray/90 mb-16 max-w-3xl mx-auto leading-relaxed"
+              className="text-base md:text-lg text-gray-400 mb-12 max-w-2xl mx-auto leading-relaxed"
               variants={fadeInUp}
             >
               Upload an invoice. Watch the protocol enforce settlement. Experience trustless invoice factoring.
             </motion.p>
 
             <motion.div
-              className="flex flex-col sm:flex-row gap-6 justify-center items-center"
+              className="flex flex-col sm:flex-row gap-4 justify-center items-center"
               variants={fadeInUp}
             >
               <Link
                 href="/msme"
-                className="group relative inline-block"
+                className="bg-emerald-500 text-white font-semibold px-8 py-3.5 text-base rounded-xl hover:bg-emerald-400 transition-all duration-200 hover:shadow-lg hover:shadow-emerald-500/30"
               >
-                <div className="absolute inset-0 bg-sage-green-500 rounded-xl blur-xl opacity-50 group-hover:opacity-75 transition-opacity duration-300" />
-                <div className="relative bg-sage-green-500 text-charcoal font-bold px-12 py-5 text-lg rounded-xl hover:bg-sage-green-400 active:bg-sage-green-600 transition-all duration-200 hover:scale-105 shadow-2xl shadow-sage-green-500/30">
-                  Upload Invoice
-                </div>
+                Upload Invoice
               </Link>
               <Link
                 href="/browse"
-                className="inline-block border-2 border-sage-green-500/40 text-sage-green-400 font-bold px-12 py-5 text-lg rounded-xl hover:border-sage-green-500/70 hover:bg-sage-green-500/10 transition-all duration-300 hover:scale-105 backdrop-blur-sm"
+                className="border border-white/[0.12] bg-white/[0.03] text-white font-semibold px-8 py-3.5 text-base rounded-xl hover:border-white/[0.2] hover:bg-white/[0.06] transition-all duration-200"
               >
                 Browse Demo
               </Link>
             </motion.div>
 
             <motion.p
-              className="text-sm text-medium-gray/70 mt-14 font-mono tracking-widest uppercase"
+              className="text-xs text-gray-600 mt-10 tracking-wide"
               variants={fadeInUp}
             >
               Avalanche Fuji Testnet · No Real Funds
@@ -490,30 +503,30 @@ export default function Home() {
       </ScrollReveal>
 
       {/* FOOTER */}
-      <footer className="py-8 px-6 border-t border-medium-gray/10">
-        <div className="max-w-4xl mx-auto">
-          <div className="flex flex-col md:flex-row justify-between items-center gap-4">
-            <div className="flex gap-6">
+      <footer className="py-12 px-6 border-t border-white/[0.08] bg-white/[0.02]">
+        <div className="max-w-6xl mx-auto">
+          <div className="flex flex-col md:flex-row justify-between items-center gap-6">
+            <div className="flex gap-8">
               {["Home", "Browse", "Portfolio", "About"].map((item) => (
-                <Link 
+                <Link
                   key={item}
-                  href={item === "Home" ? "/" : `/${item.toLowerCase()}`} 
-                  className="text-medium-gray/60 hover:text-off-white transition-colors duration-150 text-xs"
+                  href={item === "Home" ? "/" : `/${item.toLowerCase()}`}
+                  className="text-gray-400 hover:text-white transition-colors duration-200 text-sm font-medium"
                 >
                   {item}
                 </Link>
               ))}
-              <a 
-                href="https://github.com/nytrixis/chaitrade" 
-                target="_blank" 
-                rel="noopener noreferrer" 
-                className="text-medium-gray/60 hover:text-off-white transition-colors duration-150 text-xs"
+              <a
+                href="https://github.com/nytrixis/chaitrade"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-gray-400 hover:text-white transition-colors duration-200 text-sm font-medium"
               >
                 GitHub
               </a>
             </div>
-            
-            <p className="text-medium-gray/40 text-[10px] font-mono">
+
+            <p className="text-gray-600 text-xs">
               Avalanche Fuji Testnet
             </p>
           </div>
@@ -549,7 +562,7 @@ function InvariantItem({
 
   return (
     <motion.div
-      className="bg-gradient-to-br from-dark-gray/60 to-dark-gray/30 border-2 border-sage-green-500/20 rounded-2xl p-10 cursor-default group hover:border-sage-green-500/50 transition-all duration-500 relative overflow-hidden backdrop-blur-sm"
+      className="bg-gradient-to-br from-dark-gray/60 to-dark-gray/30 border-2 border-emerald-500/20 rounded-2xl p-10 cursor-default group hover:border-emerald-500/50 transition-all duration-500 relative overflow-hidden backdrop-blur-sm"
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       variants={fadeInUp}
@@ -557,7 +570,7 @@ function InvariantItem({
     >
       {/* Animated gradient overlay */}
       <motion.div
-        className="absolute inset-0 bg-gradient-to-br from-sage-green-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+        className="absolute inset-0 bg-gradient-to-br from-emerald-500/10 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-500"
         animate={{
           backgroundPosition: hovered ? ["0% 0%", "100% 100%"] : "0% 0%"
         }}
@@ -565,13 +578,13 @@ function InvariantItem({
       />
 
       {/* Glow effect */}
-      <div className="absolute -top-24 -right-24 w-48 h-48 bg-sage-green-500/20 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+      <div className="absolute -top-24 -right-24 w-48 h-48 bg-emerald-500/20 rounded-full blur-3xl opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
       <div className="relative z-10">
         {/* Icon */}
         <div className="mb-8">
           <motion.div
-            className="w-20 h-20 rounded-2xl bg-sage-green-500/15 flex items-center justify-center group-hover:bg-sage-green-500/25 transition-all duration-300 border border-sage-green-500/20"
+            className="w-20 h-20 rounded-2xl bg-emerald-500/15 flex items-center justify-center group-hover:bg-emerald-500/25 transition-all duration-300 border border-emerald-500/20"
             animate={{
               rotate: hovered ? [0, 5, -5, 0] : 0
             }}
@@ -601,9 +614,9 @@ function InvariantItem({
             animate={{ opacity: hovered ? 0 : 1, y: hovered ? -20 : 0 }}
             transition={{ duration: 0.3 }}
           >
-            <div className="flex items-center gap-2 px-4 py-2 bg-sage-green-500/10 rounded-lg border border-sage-green-500/20">
-              <span className="text-sage-green-400 text-lg">✓</span>
-              <span className="text-base font-mono text-sage-green-400 font-semibold">enforced</span>
+            <div className="flex items-center gap-2 px-4 py-2 bg-emerald-500/10 rounded-lg border border-emerald-500/20">
+              <span className="text-emerald-400 text-lg">✓</span>
+              <span className="text-base font-mono text-emerald-400 font-semibold">enforced</span>
             </div>
           </motion.div>
 
@@ -641,29 +654,29 @@ function StepCard({
 
   return (
     <motion.div
-      className="bg-gradient-to-br from-dark-gray/60 to-dark-gray/30 border-2 border-sage-green-500/20 rounded-2xl p-8 relative group hover:border-sage-green-500/50 transition-all duration-500 backdrop-blur-sm"
+      className="bg-gradient-to-br from-dark-gray/60 to-dark-gray/30 border-2 border-emerald-500/20 rounded-2xl p-8 relative group hover:border-emerald-500/50 transition-all duration-500 backdrop-blur-sm"
       variants={fadeInUp}
       whileHover={{ y: -8, scale: 1.03, boxShadow: "0 30px 60px -15px rgba(61, 139, 104, 0.3)" }}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
     >
       {/* Enhanced gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-sage-green-500/0 via-sage-green-500/5 to-sage-green-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
+      <div className="absolute inset-0 bg-gradient-to-br from-emerald-500/0 via-emerald-500/5 to-emerald-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl" />
 
       {/* Glow effect */}
-      <div className="absolute inset-0 rounded-2xl bg-sage-green-500/0 group-hover:bg-sage-green-500/5 blur-xl transition-all duration-500" />
+      <div className="absolute inset-0 rounded-2xl bg-emerald-500/0 group-hover:bg-emerald-500/5 blur-xl transition-all duration-500" />
 
       <div className="relative z-10">
         {/* Larger number badge */}
         <motion.div
-          className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-sage-green-500/15 mb-6 group-hover:bg-sage-green-500/25 transition-colors duration-300 border border-sage-green-500/20"
+          className="inline-flex items-center justify-center w-16 h-16 rounded-xl bg-emerald-500/15 mb-6 group-hover:bg-emerald-500/25 transition-colors duration-300 border border-emerald-500/20"
           animate={{
             scale: hovered ? 1.1 : 1,
             rotate: hovered ? [0, -5, 5, 0] : 0
           }}
           transition={{ duration: 0.4 }}
         >
-          <span className="text-sage-green-400 text-2xl font-bold font-mono">{number}</span>
+          <span className="text-emerald-400 text-2xl font-bold font-mono">{number}</span>
         </motion.div>
 
         {/* Larger text */}
@@ -672,16 +685,16 @@ function StepCard({
         </p>
 
         {/* Enhanced state label */}
-        <div className="pt-4 border-t border-sage-green-500/20">
+        <div className="pt-4 border-t border-emerald-500/20">
           <motion.div
-            className="inline-flex items-center gap-2 px-3 py-2 bg-sage-green-500/10 rounded-lg border border-sage-green-500/20"
+            className="inline-flex items-center gap-2 px-3 py-2 bg-emerald-500/10 rounded-lg border border-emerald-500/20"
             animate={{
               x: hovered ? [0, 4, 0] : 0
             }}
             transition={{ duration: 0.5 }}
           >
-            <div className="w-2 h-2 rounded-full bg-sage-green-400 animate-pulse" />
-            <p className="text-sm font-mono text-sage-green-400 tracking-wider uppercase font-semibold">
+            <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+            <p className="text-sm font-mono text-emerald-400 tracking-wider uppercase font-semibold">
               {stateLabel}
             </p>
           </motion.div>
@@ -697,8 +710,8 @@ function StepCard({
           }}
           transition={{ duration: 1, repeat: hovered ? Infinity : 0 }}
         >
-          <div className="w-8 h-8 rounded-full bg-charcoal border-2 border-sage-green-500/30 flex items-center justify-center group-hover:border-sage-green-500/70 transition-all duration-300 shadow-lg">
-            <span className="text-sage-green-400/70 text-lg group-hover:text-sage-green-400 transition-colors duration-300">→</span>
+          <div className="w-8 h-8 rounded-full bg-charcoal border-2 border-emerald-500/30 flex items-center justify-center group-hover:border-emerald-500/70 transition-all duration-300 shadow-lg">
+            <span className="text-emerald-400/70 text-lg group-hover:text-emerald-400 transition-colors duration-300">→</span>
           </div>
         </motion.div>
       )}
@@ -832,7 +845,7 @@ function MacWindow() {
               <div className="flex flex-col items-center">
                 <motion.div 
                   className={`w-2.5 h-2.5 rounded-full transition-all duration-500 ${
-                    idx <= stateIndex ? 'bg-sage-green-500' : 'bg-medium-gray/40'
+                    idx <= stateIndex ? 'bg-emerald-500' : 'bg-medium-gray/40'
                   }`}
                   animate={{ 
                     scale: idx === stateIndex ? [1, 1.3, 1] : 1,
@@ -841,7 +854,7 @@ function MacWindow() {
                   transition={{ duration: 0.5, repeat: idx === stateIndex ? Infinity : 0, repeatDelay: 1 }}
                 />
                 <span className={`text-xs mt-1.5 font-mono capitalize transition-colors duration-300 ${
-                  idx <= stateIndex ? 'text-sage-green-400' : 'text-medium-gray/50'
+                  idx <= stateIndex ? 'text-emerald-400' : 'text-medium-gray/50'
                 }`}>
                   {state}
                 </span>
@@ -851,7 +864,7 @@ function MacWindow() {
                   className="w-16 md:w-24 h-px mx-2 bg-medium-gray/30 overflow-hidden"
                 >
                   <motion.div 
-                    className="h-full bg-sage-green-500"
+                    className="h-full bg-emerald-500"
                     initial={{ width: "0%" }}
                     animate={{ width: idx < stateIndex ? "100%" : "0%" }}
                     transition={{ duration: 0.5, delay: idx * 0.2 }}
@@ -882,14 +895,14 @@ function MacWindow() {
                   step === tab.id 
                     ? 'text-off-white' 
                     : step > tab.id 
-                      ? 'text-sage-green-400/60 hover:text-sage-green-400' 
+                      ? 'text-emerald-400/60 hover:text-emerald-400' 
                       : 'text-medium-gray/50 cursor-not-allowed'
                 }`}
               >
                 {tab.label}
                 {step === tab.id && (
                   <motion.div 
-                    className="absolute bottom-0 left-0 right-0 h-px bg-sage-green-500"
+                    className="absolute bottom-0 left-0 right-0 h-px bg-emerald-500"
                     layoutId="activeTab"
                     transition={{ duration: 0.3 }}
                   />
@@ -919,9 +932,9 @@ function MacWindow() {
                 <motion.div 
                   className={`border-2 border-dashed p-8 text-center mb-4 cursor-pointer transition-all duration-300 ${
                     isDragging 
-                      ? 'border-sage-green-500 bg-sage-green-500/5' 
+                      ? 'border-emerald-500 bg-emerald-500/5' 
                       : uploadedFile 
-                        ? 'border-sage-green-500/50 bg-sage-green-500/5' 
+                        ? 'border-emerald-500/50 bg-emerald-500/5' 
                         : 'border-medium-gray/40 hover:border-medium-gray/60'
                   }`}
                   onDragOver={handleDragOver}
@@ -934,15 +947,15 @@ function MacWindow() {
                   {isProcessing ? (
                     <div className="flex flex-col items-center gap-2">
                       <motion.div 
-                        className="w-6 h-6 border-2 border-sage-green-500 border-t-transparent rounded-full"
+                        className="w-6 h-6 border-2 border-emerald-500 border-t-transparent rounded-full"
                         animate={{ rotate: 360 }}
                         transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
                       />
-                      <p className="text-sage-green-400 text-sm font-mono">Processing...</p>
+                      <p className="text-emerald-400 text-sm font-mono">Processing...</p>
                     </div>
                   ) : uploadedFile ? (
                     <div className="flex flex-col items-center gap-1">
-                      <p className="text-sage-green-400 text-sm">{uploadedFile.name}</p>
+                      <p className="text-emerald-400 text-sm">{uploadedFile.name}</p>
                       <p className="text-xs text-medium-gray">Click to replace</p>
                     </div>
                   ) : (
@@ -1006,7 +1019,7 @@ function MacWindow() {
                   disabled={!invoiceData.amount}
                   className={`w-full font-medium px-4 py-3 text-sm transition-all duration-200 ${
                     invoiceData.amount 
-                      ? 'bg-sage-green-500 text-charcoal hover:bg-sage-green-600 active:bg-sage-green-700' 
+                      ? 'bg-emerald-500 text-charcoal hover:bg-emerald-600 active:bg-sage-green-700' 
                       : 'bg-medium-gray/20 text-medium-gray cursor-not-allowed'
                   }`}
                   whileHover={invoiceData.amount ? { scale: 1.01 } : {}}
@@ -1033,7 +1046,7 @@ function MacWindow() {
                   </div>
                   <div className="h-1.5 bg-dark-gray overflow-hidden rounded-full">
                     <motion.div 
-                      className="h-full bg-sage-green-500"
+                      className="h-full bg-emerald-500"
                       initial={{ width: 0 }}
                       animate={{ width: `${fundingProgress}%` }}
                       transition={{ duration: 0.5 }}
@@ -1046,7 +1059,7 @@ function MacWindow() {
                   <motion.span 
                     className={`px-2 py-0.5 text-xs font-mono ${
                       currentState === "fundable" 
-                        ? "bg-sage-green-500/20 text-sage-green-400" 
+                        ? "bg-emerald-500/20 text-emerald-400" 
                         : "bg-yellow-500/20 text-yellow-400"
                     }`}
                     key={currentState}
@@ -1079,7 +1092,7 @@ function MacWindow() {
                   {currentState === "locked" && (
                     <motion.button 
                       onClick={handleSettle}
-                      className="w-full bg-sage-green-500 text-charcoal font-medium px-4 py-3 text-sm hover:bg-sage-green-600 active:bg-sage-green-700 transition-all duration-200"
+                      className="w-full bg-emerald-500 text-charcoal font-medium px-4 py-3 text-sm hover:bg-emerald-600 active:bg-sage-green-700 transition-all duration-200"
                       initial={{ opacity: 0, y: 10 }}
                       animate={{ opacity: 1, y: 0 }}
                       whileHover={{ scale: 1.01 }}
@@ -1103,7 +1116,7 @@ function MacWindow() {
               >
                 <div className="text-center mb-5">
                   <motion.span 
-                    className="inline-block px-4 py-1.5 text-sm font-mono bg-sage-green-500/20 text-sage-green-400"
+                    className="inline-block px-4 py-1.5 text-sm font-mono bg-emerald-500/20 text-emerald-400"
                     initial={{ scale: 0.9 }}
                     animate={{ scale: 1 }}
                     transition={{ duration: 0.3 }}
@@ -1113,7 +1126,7 @@ function MacWindow() {
                 </div>
 
                 <motion.div 
-                  className="bg-dark-gray p-5 border border-sage-green-500/20"
+                  className="bg-dark-gray p-5 border border-emerald-500/20"
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
@@ -1125,7 +1138,7 @@ function MacWindow() {
                     </div>
                     <div>
                       <p className="text-xs text-medium-gray mb-1">Interest distributed</p>
-                      <p className="text-sage-green-400 font-mono text-lg">+ ₹21,600</p>
+                      <p className="text-emerald-400 font-mono text-lg">+ ₹21,600</p>
                     </div>
                   </div>
                   <div className="border-t border-medium-gray/20 pt-4">
@@ -1159,7 +1172,7 @@ function MacWindow() {
                       event.includes('blocked') 
                         ? 'text-red-400/80' 
                         : event.includes('executed') || event.includes('escrowed') || event.includes('extracted')
-                          ? 'text-sage-green-400' 
+                          ? 'text-emerald-400' 
                           : 'text-light-gray'
                     }>
                       {event.split(' ').slice(1).join(' ')}

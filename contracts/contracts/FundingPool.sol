@@ -5,6 +5,7 @@ import "@openzeppelin/contracts/utils/ReentrancyGuard.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "./InvoiceNFT.sol";
 import "./ZKCreditOracle.sol";
+import "./libraries/RiskScoring.sol";
 
 /**
  * @title FundingPool
@@ -19,6 +20,8 @@ import "./ZKCreditOracle.sol";
  * 4. On payment: Interest + principal → Investors (proportional)
  */
 contract FundingPool is ReentrancyGuard {
+    using RiskScoring for RiskScoring.RiskFactors;
+
     InvoiceNFT public immutable invoiceNFT;
     ZKCreditOracle public immutable creditOracle;
 
@@ -42,6 +45,10 @@ contract FundingPool is ReentrancyGuard {
 
     mapping(uint256 => FundingRound) public fundingRounds;
     mapping(uint256 => Settlement) public settlements;
+
+    // Risk scoring data storage
+    mapping(uint256 => RiskScoring.RiskFactors) public invoiceRiskFactors;
+    mapping(uint256 => RiskScoring.RiskScore) public invoiceRiskScores;
 
     // Platform fee (in basis points, e.g., 500 = 5%)
     uint256 public platformFee = 500;
@@ -67,6 +74,13 @@ contract FundingPool is ReentrancyGuard {
         uint256 indexed invoiceId,
         uint256 principalPaid,
         uint256 interestPaid
+    );
+
+    event RiskAssessed(
+        uint256 indexed invoiceId,
+        uint256 riskScore,
+        uint256 interestRate,
+        string rating
     );
 
     constructor(
@@ -379,6 +393,62 @@ contract FundingPool is ReentrancyGuard {
         require(msg.sender == feeCollector, "Not fee collector");
         require(newFee <= 1000, "Fee too high"); // Max 10%
         platformFee = newFee;
+    }
+
+    /**
+     * @dev Create invoice with risk-based pricing (simplified to avoid stack too deep)
+     * First call mintInvoiceAndCreateFunding with fixed rate, then update with risk score
+     * @param invoiceId The invoice ID to update with risk scoring
+     * @param riskFactors Risk factors for pricing
+     */
+    function updateInvoiceRiskPricing(
+        uint256 invoiceId,
+        RiskScoring.RiskFactors memory riskFactors
+    ) external nonReentrant {
+        // Verify caller owns the invoice
+        require(invoiceNFT.ownerOf(invoiceId) == msg.sender, "Not invoice owner");
+
+        // Validate risk factors
+        require(RiskScoring.validateFactors(riskFactors), "Invalid risk factors");
+
+        // Get invoice details
+        InvoiceNFT.InvoiceMetadata memory invoice = invoiceNFT.getInvoice(invoiceId);
+
+        // Set invoice amount in risk factors
+        riskFactors.invoiceAmount = invoice.amount;
+
+        // Calculate risk score
+        RiskScoring.RiskScore memory riskScore = RiskScoring.calculateRiskScore(riskFactors);
+
+        // Store risk data
+        invoiceRiskFactors[invoiceId] = riskFactors;
+        invoiceRiskScores[invoiceId] = riskScore;
+
+        // Update funding round interest rate
+        FundingRound storage round = fundingRounds[invoiceId];
+        require(round.isActive, "Round not active");
+        require(round.raisedAmount == 0, "Funding already started");
+
+        round.interestRate = riskScore.interestRate;
+
+        emit RiskAssessed(invoiceId, riskScore.score, riskScore.interestRate, riskScore.rating);
+    }
+
+    /**
+     * @dev Get risk assessment for an invoice
+     * @param invoiceId Invoice ID
+     * @return factors The risk factors used
+     * @return score The calculated risk score
+     */
+    function getInvoiceRiskData(uint256 invoiceId)
+        external
+        view
+        returns (
+            RiskScoring.RiskFactors memory factors,
+            RiskScoring.RiskScore memory score
+        )
+    {
+        return (invoiceRiskFactors[invoiceId], invoiceRiskScores[invoiceId]);
     }
 
     /**
