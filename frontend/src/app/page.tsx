@@ -100,6 +100,13 @@ export default function Home() {
           </motion.h1>
 
           <motion.p
+            className="text-sm md:text-base text-gray-500 max-w-2xl leading-relaxed mb-4 font-medium"
+            variants={fadeInUp}
+          >
+            For Indian MSMEs waiting 45–90 days to get paid by large buyers.
+          </motion.p>
+
+          <motion.p
             className="text-base md:text-lg text-gray-400 max-w-2xl leading-relaxed"
             variants={fadeInUp}
           >
@@ -126,12 +133,14 @@ export default function Home() {
             className="flex gap-4 mt-10 flex-col sm:flex-row items-start"
             variants={fadeInUp}
           >
-            <Link
-              href="/msme"
-              className="group inline-block bg-emerald-500 text-white font-semibold text-base px-8 py-3.5 rounded-xl hover:bg-emerald-400 transition-all duration-200 hover:shadow-lg hover:shadow-emerald-500/30"
+            <button
+              onClick={() => {
+                document.getElementById('demo')?.scrollIntoView({ behavior: 'smooth' });
+              }}
+              className="group inline-block bg-emerald-500 text-white font-semibold text-base px-8 py-3.5 rounded-xl hover:bg-emerald-400 transition-all duration-200 hover:shadow-lg hover:shadow-emerald-500/30 cursor-pointer"
             >
               <span className="flex items-center gap-2">
-                Upload Invoice
+                See it Work
                 <motion.span
                   className="inline-block"
                   animate={{ x: [0, 3, 0] }}
@@ -140,12 +149,12 @@ export default function Home() {
                   →
                 </motion.span>
               </span>
-            </Link>
+            </button>
             <Link
-              href="/browse"
+              href="/msme"
               className="inline-block border border-white/[0.12] bg-white/[0.03] text-white font-semibold text-base px-8 py-3.5 rounded-xl hover:border-white/[0.2] hover:bg-white/[0.06] transition-all duration-200"
             >
-              View Live Demo
+              Upload Invoice
             </Link>
           </motion.div>
 
@@ -217,7 +226,7 @@ export default function Home() {
 
       {/* SECTION 3 — INTERACTIVE DEMO */}
       <ScrollReveal>
-        <section className="py-32 px-6 lg:px-12 bg-charcoal border-t border-b border-emerald-500/10 relative">
+        <section id="demo" className="py-32 px-6 lg:px-12 bg-charcoal border-t border-b border-emerald-500/10 relative">
           <div className="absolute inset-0 bg-gradient-to-b from-emerald-500/[0.05] via-transparent to-transparent pointer-events-none" />
           <div className="max-w-7xl mx-auto relative">
             <motion.div className="text-center mb-16" variants={fadeInUp}>

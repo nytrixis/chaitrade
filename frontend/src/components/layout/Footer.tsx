@@ -123,7 +123,6 @@ const Footer: React.FC = () => {
                 { label: "Terms of Service", href: "/terms" },
                 { label: "Privacy Policy", href: "/privacy" },
                 { label: "Risk Disclosure", href: "/risk-disclosure" },
-                { label: "RBI Compliance", href: "/compliance" }
               ].map((item, index) => (
                 <li key={index}>
                   <Link 
@@ -175,7 +174,7 @@ const Footer: React.FC = () => {
               Live on Avalanche Fuji
             </span>
             <span className="text-xs text-gray-500">
-              RBI Approved | Aug 2024
+              Designed with RBI compliance guidelines in mind
             </span>
           </div>
         </div>
